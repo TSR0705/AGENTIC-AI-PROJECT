@@ -1,1 +1,5 @@
-NODE_MODULES
+# Node modules folder ko ignore karega
+node_modules/
+
+# Environment files ko ignore karega
+.env
