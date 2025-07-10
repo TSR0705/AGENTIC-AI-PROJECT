@@ -15,6 +15,7 @@ export const createUserController = async (req, res) => {
         const user = await userService.createUser(req.body);
 
         const token = await user.generateJWT();
+        delete user._doc.password;
 
         res.status(201).json({ user, token });
     } catch (error) {
