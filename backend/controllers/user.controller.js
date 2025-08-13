@@ -1,31 +1,11 @@
+import projectModel from '../models/project.model.js';
+import * as projectService from '../services/project.service.js';
 import userModel from '../models/user.model.js';
-import * as userService from '../services/user.service.js';
 import { validationResult } from 'express-validator';
-import redisClient from '../services/redis.service.js';
 
 
-export const createUserController = async (req, res) => {
-    const errors = validationResult(req);
+export const createProject = async (req, res) => {
 
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-
-    try {
-        const user = await userService.createUser(req.body);
-
-        const token = await user.generateJWT();
-        delete user._doc.password;
-
-        res.status(201).json({ user, token });
-    } catch (error) {
-        console.error(error); // Helpful for debugging
-        res.status(400).json({ error: error.message });
-    }
-};
-
-
-export const loginController = async (req, res) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -34,65 +14,120 @@ export const loginController = async (req, res) => {
 
     try {
 
-        const { email, password } = req.body;
+        const { name } = req.body;
+        const loggedInUser = await userModel.findOne({ email: req.user.email });
+        const userId = loggedInUser._id;
 
-        const user = await userModel.findOne({ email }).select('+password');
+        const newProject = await projectService.createProject({ name, userId });
 
-        if (!user) {
-            return res.status(401).json({
-                errors: 'Invalid credentials'
-            })
-        }
-
-        const isMatch = await user.isValidPassword(password);
-
-        if (!isMatch) {
-            return res.status(401).json({
-                errors: 'Invalid credentials'
-            })
-        }
-
-        const token = await user.generateJWT();
-
-        delete user._doc.password;
-
-        res.status(200).json({ user, token });
-
+        res.status(201).json(newProject);
 
     } catch (err) {
-
         console.log(err);
-
         res.status(400).send(err.message);
     }
-}
 
 
-export const profileController = async (req, res) => {
-
-    console.log(req.user);
-
-    res.status(200).json({
-        user: req.user
-    });
 
 }
 
-
-export const logoutController = async (req, res) => {
+export const getAllProject = async (req, res) => {
     try {
 
-        const token = req.cookies.token || req.headers.authorization.split(' ')[ 1 ];
+        const loggedInUser = await userModel.findOne({
+            email: req.user.email
+        })
 
-        redisClient.set(token, 'logout', 'EX', 60 * 60 * 24);
+        const allUserProjects = await projectService.getAllProjectByUserId({
+            userId: loggedInUser._id
+        })
 
-        res.status(200).json({
-            message: 'Logged out successfully'
-        });
-
+        return res.status(200).json({
+            projects: allUserProjects
+        })
 
     } catch (err) {
-        console.log(err);
-        res.status(400).send(err.message);
+        console.log(err)
+        res.status(400).json({ error: err.message })
     }
+}
+
+export const addUserToProject = async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+
+        const { projectId, users } = req.body
+
+        const loggedInUser = await userModel.findOne({
+            email: req.user.email
+        })
+
+
+        const project = await projectService.addUsersToProject({
+            projectId,
+            users,
+            userId: loggedInUser._id
+        })
+
+        return res.status(200).json({
+            project,
+        })
+
+    } catch (err) {
+        console.log(err)
+        res.status(400).json({ error: err.message })
+    }
+
+
+}
+
+export const getProjectById = async (req, res) => {
+
+    const { projectId } = req.params;
+
+    try {
+
+        const project = await projectService.getProjectById({ projectId });
+
+        return res.status(200).json({
+            project
+        })
+
+    } catch (err) {
+        console.log(err)
+        res.status(400).json({ error: err.message })
+    }
+
+}
+
+export const updateFileTree = async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+
+        const { projectId, fileTree } = req.body;
+
+        const project = await projectService.updateFileTree({
+            projectId,
+            fileTree
+        })
+
+        return res.status(200).json({
+            project
+        })
+
+    } catch (err) {
+        console.log(err)
+        res.status(400).json({ error: err.message })
+    }
+
 }
