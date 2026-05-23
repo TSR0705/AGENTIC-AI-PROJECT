@@ -1,30 +1,37 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
-
-const projectSchema = new mongoose.Schema({
-    name: {
+const userSchema = new mongoose.Schema({
+    email: {
         type: String,
-        lowercase: true,
         required: true,
+        unique: true,
         trim: true,
-        unique: [ true, 'Project name must be unique' ],
+        lowercase: true,
+        minLength: [ 6, 'Email must be at least 6 characters long' ],
+        maxLength: [ 50, 'Email must be at most 50 characters long' ]
     },
 
-    users: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'user'
-        }
-    ],
-    fileTree: {
-        type: Object,
-        default: {}
-    },
-
+    password: {
+        type: String,
+        required: true,
+        select: false
+    }
 })
 
+userSchema.statics.hashPassword = async function (password) {
+    return await bcrypt.hash(password, 10);
+}
 
-const Project = mongoose.model('project', projectSchema)
+userSchema.methods.comparePassword = async function (password) {
+    return await bcrypt.compare(password, this.password);
+}
 
+userSchema.methods.generateJWT = function () {
+    return jwt.sign({ email: this.email }, process.env.JWT_SECRET, { expiresIn: '24h' });
+}
 
-export default Project;
+const User = mongoose.model('user', userSchema);
+
+export default User;
