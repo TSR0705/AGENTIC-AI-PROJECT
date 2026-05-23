@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { UserContext } from '../context/user.context'
 import axios from '../config/axios'
@@ -11,6 +11,13 @@ const Register = () => {
     const { setUser } = useContext(UserContext)
 
     const navigate = useNavigate()
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            navigate('/');
+        }
+    }, [navigate]);
 
 
     function submitHandler(e) {
