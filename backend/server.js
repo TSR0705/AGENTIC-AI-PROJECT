@@ -70,6 +70,23 @@ io.on('connection', socket => {
 
         const message = data.message;
 
+        // Persist user message to project in database
+        try {
+            await projectModel.findByIdAndUpdate(socket.project._id, {
+                $push: {
+                    messages: {
+                        sender: {
+                            _id: data.sender._id,
+                            email: data.sender.email
+                        },
+                        message: data.message
+                    }
+                }
+            });
+        } catch (dbErr) {
+            console.error("Failed to save user message to DB:", dbErr.message);
+        }
+
         const aiIsPresentInMessage = message.includes('@ai');
         socket.broadcast.to(socket.roomId).emit('project-message', data)
 
@@ -78,6 +95,19 @@ io.on('connection', socket => {
 
             try {
                 const result = await generateResult(prompt);
+
+                // Persist AI message to database
+                await projectModel.findByIdAndUpdate(socket.project._id, {
+                    $push: {
+                        messages: {
+                            sender: {
+                                _id: 'ai',
+                                email: 'AI'
+                            },
+                            message: result
+                        }
+                    }
+                });
 
                 io.to(socket.roomId).emit('project-message', {
                     message: result,

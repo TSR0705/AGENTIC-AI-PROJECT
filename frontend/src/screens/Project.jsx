@@ -35,6 +35,7 @@ const Project = () => {
                 setProject(res.data.project);
                 setCollaborators(res.data.project.users || []);
                 setFileTree(res.data.project.fileTree || {});
+                setMessages(res.data.project.messages || []);
             })
             .catch(err => {
                 console.error(err);
