@@ -74,21 +74,30 @@ io.on('connection', socket => {
         socket.broadcast.to(socket.roomId).emit('project-message', data)
 
         if (aiIsPresentInMessage) {
-
-
             const prompt = message.replace('@ai', '');
 
-            const result = await generateResult(prompt);
+            try {
+                const result = await generateResult(prompt);
 
-
-            io.to(socket.roomId).emit('project-message', {
-                message: result,
-                sender: {
-                    _id: 'ai',
-                    email: 'AI'
-                }
-            })
-
+                io.to(socket.roomId).emit('project-message', {
+                    message: result,
+                    sender: {
+                        _id: 'ai',
+                        email: 'AI'
+                    }
+                })
+            } catch (error) {
+                console.error("AI Generation Error:", error.message);
+                io.to(socket.roomId).emit('project-message', {
+                    message: JSON.stringify({
+                        text: `⚠️ WhisperAgent Error: Failed to generate response (${error.message}). Please verify your GOOGLE_AI_KEY in backend/.env.`
+                    }),
+                    sender: {
+                        _id: 'ai',
+                        email: 'AI'
+                    }
+                });
+            }
 
             return
         }
