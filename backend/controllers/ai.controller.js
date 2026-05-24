@@ -1,5 +1,4 @@
-import * as ai from '../services/ai.service.js';
-
+import * as ai from "../services/ai.service.js";
 
 export const getResult = async (req, res) => {
     try {
@@ -9,4 +8,4 @@ export const getResult = async (req, res) => {
     } catch (error) {
         res.status(500).send({ message: error.message });
     }
-}
+};
