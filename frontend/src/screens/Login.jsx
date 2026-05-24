@@ -1,36 +1,39 @@
-import React, { useState, useContext, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import axios from '../config/axios'
-import { UserContext } from '../context/user.context'
+import React, { useState, useContext, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "../config/axios";
+import { UserContext } from "../context/user.context";
 
 const Login = () => {
-    const [ email, setEmail ] = useState('')
-    const [ password, setPassword ] = useState('')
-    const { setUser } = useContext(UserContext)
-    const navigate = useNavigate()
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const { setUser } = useContext(UserContext);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         if (token) {
-            navigate('/');
+            navigate("/");
         }
     }, [navigate]);
 
     function submitHandler(e) {
-        e.preventDefault()
+        e.preventDefault();
 
-        axios.post('/users/login', {
-            email,
-            password
-        }).then((res) => {
-            console.log(res.data)
-            localStorage.setItem('token', res.data.token)
-            setUser(res.data.user)
-            navigate('/')
-        }).catch((err) => {
-            console.log(err.response?.data)
-            alert(err.response?.data?.errors?.[0]?.msg || "Invalid Credentials");
-        })
+        axios
+            .post("/users/login", {
+                email,
+                password,
+            })
+            .then((res) => {
+                console.log(res.data);
+                localStorage.setItem("token", res.data.token);
+                setUser(res.data.user);
+                navigate("/");
+            })
+            .catch((err) => {
+                console.log(err.response?.data);
+                alert(err.response?.data?.errors?.[0]?.msg || "Invalid Credentials");
+            });
     }
 
     return (
@@ -43,15 +46,18 @@ const Login = () => {
                     <div className="w-12 h-12 bg-obsidian-900 border border-obsidian-800 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-inner">
                         <i className="ri-terminal-box-line text-xl text-zinc-300"></i>
                     </div>
-                    <h2 className="text-xl font-bold tracking-tight text-white mb-1.5 font-mono">
-                        whisper-sandbox
-                    </h2>
+                    <h2 className="text-xl font-bold tracking-tight text-white mb-1.5 font-mono">whisper-sandbox</h2>
                     <p className="text-xs text-obsidian-400 font-mono">Collaborative coding workspace</p>
                 </header>
 
                 <form onSubmit={submitHandler} className="space-y-4">
                     <div>
-                        <label className="block text-[10px] font-bold text-obsidian-300 uppercase tracking-wider mb-2 font-mono" htmlFor="email">Email Address</label>
+                        <label
+                            className="block text-[10px] font-bold text-obsidian-300 uppercase tracking-wider mb-2 font-mono"
+                            htmlFor="email"
+                        >
+                            Email Address
+                        </label>
                         <div className="relative">
                             <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-obsidian-400">
                                 <i className="ri-mail-line text-sm"></i>
@@ -69,7 +75,12 @@ const Login = () => {
                     </div>
 
                     <div>
-                        <label className="block text-[10px] font-bold text-obsidian-300 uppercase tracking-wider mb-2 font-mono" htmlFor="password">Password</label>
+                        <label
+                            className="block text-[10px] font-bold text-obsidian-300 uppercase tracking-wider mb-2 font-mono"
+                            htmlFor="password"
+                        >
+                            Password
+                        </label>
                         <div className="relative">
                             <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-obsidian-400">
                                 <i className="ri-lock-line text-sm"></i>
@@ -97,12 +108,18 @@ const Login = () => {
 
                 <footer className="text-center mt-6 pt-6 border-t border-obsidian-900">
                     <p className="text-xs text-obsidian-400 font-mono">
-                        Don't have an account? <Link to="/register" className="text-white hover:text-accent-violet font-semibold transition-colors">Register now</Link>
+                        Don't have an account?{" "}
+                        <Link
+                            to="/register"
+                            className="text-white hover:text-accent-violet font-semibold transition-colors"
+                        >
+                            Register now
+                        </Link>
                     </p>
                 </footer>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default Login
+export default Login;
