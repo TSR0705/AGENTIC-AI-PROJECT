@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { UserContext } from '../context/user.context';
-import axios from '../config/axios';
-import { io } from 'socket.io-client';
-import Editor from '@monaco-editor/react';
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { UserContext } from "../context/user.context";
+import axios from "../config/axios";
+import { io } from "socket.io-client";
+import Editor from "@monaco-editor/react";
 
 const Project = () => {
     const { projectId } = useParams();
@@ -19,7 +19,7 @@ const Project = () => {
     const [isUnsaved, setIsUnsaved] = useState(false);
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState("");
-    
+
     // Modals & Panels
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
     const [allUsers, setAllUsers] = useState([]);
@@ -34,79 +34,81 @@ const Project = () => {
     // Refs
     const socketRef = useRef(null);
     const messagesEndRef = useRef(null);
+    const textareaRef = useRef(null);
 
     // Monaco language mapping helper
     const getLanguageFromFilename = (filename) => {
-        if (!filename) return 'plaintext';
-        const ext = filename.split('.').pop().toLowerCase();
+        if (!filename) return "plaintext";
+        const ext = filename.split(".").pop().toLowerCase();
         switch (ext) {
-            case 'js':
-            case 'jsx':
-                return 'javascript';
-            case 'ts':
-            case 'tsx':
-                return 'typescript';
-            case 'css':
-                return 'css';
-            case 'html':
-                return 'html';
-            case 'json':
-                return 'json';
-            case 'md':
-                return 'markdown';
-            case 'py':
-                return 'python';
+            case "js":
+            case "jsx":
+                return "javascript";
+            case "ts":
+            case "tsx":
+                return "typescript";
+            case "css":
+                return "css";
+            case "html":
+                return "html";
+            case "json":
+                return "json";
+            case "md":
+                return "markdown";
+            case "py":
+                return "python";
             default:
-                return 'plaintext';
+                return "plaintext";
         }
     };
-
-
 
     // Fetch Project Details and Users
     useEffect(() => {
         // Fetch project
-        axios.get(`/projects/get-project/${projectId}`)
-            .then(res => {
+        axios
+            .get(`/projects/get-project/${projectId}`)
+            .then((res) => {
                 setProject(res.data.project);
                 setCollaborators(res.data.project.users || []);
                 setFileTree(res.data.project.fileTree || {});
                 setMessages(res.data.project.messages || []);
             })
-            .catch(err => {
+            .catch((err) => {
                 console.error(err);
                 alert("Failed to load project details");
-                navigate('/');
+                navigate("/");
             });
 
         // Initialize Sockets
-        const token = localStorage.getItem('token');
-        const socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-        
+        const token = localStorage.getItem("token");
+        const socketUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
         socketRef.current = io(socketUrl, {
             auth: { token },
-            query: { projectId }
+            query: { projectId },
         });
 
-        socketRef.current.on('connect', () => {
+        socketRef.current.on("connect", () => {
             console.log("Connected to project room:", projectId);
         });
 
-        socketRef.current.on('project-message', (data) => {
-            setMessages(prev => [...prev, data]);
-            
+        socketRef.current.on("project-message", (data) => {
+            setMessages((prev) => [...prev, data]);
+
             // Check if message is from AI and contains a fileTree
-            if (data.sender?._id === 'ai') {
+            if (data.sender?._id === "ai") {
                 try {
-                    const aiContent = typeof data.message === 'string' ? JSON.parse(data.message) : data.message;
+                    const aiContent = typeof data.message === "string" ? JSON.parse(data.message) : data.message;
                     if (aiContent.fileTree) {
-                        setFileTree(prevTree => {
+                        setFileTree((prevTree) => {
                             const newTree = { ...prevTree, ...aiContent.fileTree };
                             // Persist tree to backend
-                            axios.put('/projects/update-file-tree', {
-                                projectId,
-                                fileTree: newTree
-                            }).catch(err => console.error("Error auto-saving AI files:", err));
+                            axios
+                                .put("/projects/update-file-tree", {
+                                    projectId,
+                                    fileTree: newTree,
+                                })
+                                .catch((err) => console.error("Error auto-saving AI files:", err));
                             return newTree;
                         });
                     }
@@ -125,7 +127,7 @@ const Project = () => {
 
     // Scroll to bottom of chat
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
     // Handle sending message
@@ -135,11 +137,11 @@ const Project = () => {
 
         const messageData = {
             message: inputMessage,
-            sender: user
+            sender: user,
         };
 
-        socketRef.current.emit('project-message', messageData);
-        setMessages(prev => [...prev, messageData]);
+        socketRef.current.emit("project-message", messageData);
+        setMessages((prev) => [...prev, messageData]);
         setInputMessage("");
     };
 
@@ -149,13 +151,13 @@ const Project = () => {
         setEditorContent(fileTree[filename]?.file?.contents || "");
         setIsUnsaved(false);
         if (!openTabs.includes(filename)) {
-            setOpenTabs(prev => [...prev, filename]);
+            setOpenTabs((prev) => [...prev, filename]);
         }
     };
 
     // Close Tab
     const handleCloseTab = (filename) => {
-        const remainingTabs = openTabs.filter(t => t !== filename);
+        const remainingTabs = openTabs.filter((t) => t !== filename);
         setOpenTabs(remainingTabs);
         if (selectedFile === filename) {
             if (remainingTabs.length > 0) {
@@ -177,25 +179,26 @@ const Project = () => {
             [selectedFile]: {
                 ...fileTree[selectedFile],
                 file: {
-                    contents: editorContent
-                }
-            }
+                    contents: editorContent,
+                },
+            },
         };
 
         setFileTree(updatedFileTree);
         setIsUnsaved(false);
 
-        axios.put('/projects/update-file-tree', {
-            projectId,
-            fileTree: updatedFileTree
-        })
-        .then(() => {
-            // Soft toast/alert
-        })
-        .catch(err => {
-            console.error(err);
-            alert("Failed to save changes to server");
-        });
+        axios
+            .put("/projects/update-file-tree", {
+                projectId,
+                fileTree: updatedFileTree,
+            })
+            .then(() => {
+                // Soft toast/alert
+            })
+            .catch((err) => {
+                console.error(err);
+                alert("Failed to save changes to server");
+            });
     };
 
     // Create file & add tab
@@ -211,22 +214,24 @@ const Project = () => {
             ...fileTree,
             [name]: {
                 file: {
-                    contents: ""
-                }
-            }
+                    contents: "",
+                },
+            },
         };
         setFileTree(updatedTree);
         setSelectedFile(name);
         setEditorContent("");
         setIsUnsaved(false);
         if (!openTabs.includes(name)) {
-            setOpenTabs(prev => [...prev, name]);
+            setOpenTabs((prev) => [...prev, name]);
         }
 
-        axios.put('/projects/update-file-tree', {
-            projectId,
-            fileTree: updatedTree
-        }).catch(err => console.error(err));
+        axios
+            .put("/projects/update-file-tree", {
+                projectId,
+                fileTree: updatedTree,
+            })
+            .catch((err) => console.error(err));
     };
 
     // Delete file & remove tab
@@ -236,12 +241,12 @@ const Project = () => {
 
         const updatedTree = { ...fileTree };
         delete updatedTree[filename];
-        
+
         setFileTree(updatedTree);
-        setOpenTabs(prev => prev.filter(t => t !== filename));
-        
+        setOpenTabs((prev) => prev.filter((t) => t !== filename));
+
         if (selectedFile === filename) {
-            const remainingTabs = openTabs.filter(t => t !== filename);
+            const remainingTabs = openTabs.filter((t) => t !== filename);
             if (remainingTabs.length > 0) {
                 handleOpenFile(remainingTabs[remainingTabs.length - 1]);
             } else {
@@ -251,51 +256,55 @@ const Project = () => {
             }
         }
 
-        axios.put('/projects/update-file-tree', {
-            projectId,
-            fileTree: updatedTree
-        }).catch(err => console.error(err));
+        axios
+            .put("/projects/update-file-tree", {
+                projectId,
+                fileTree: updatedTree,
+            })
+            .catch((err) => console.error(err));
     };
 
     // Invite collaborator
     const handleOpenInviteModal = () => {
         setIsInviteModalOpen(true);
-        axios.get('/users/all')
-            .then(res => {
+        axios
+            .get("/users/all")
+            .then((res) => {
                 setAllUsers(res.data.users || []);
             })
-            .catch(err => console.error(err));
+            .catch((err) => console.error(err));
     };
 
     const handleAddCollaborator = (targetUserId) => {
-        axios.put('/projects/add-user', {
-            projectId,
-            users: [targetUserId]
-        })
-        .then(res => {
-            setCollaborators(res.data.project.users || []);
-            alert("Member added to project!");
-        })
-        .catch(err => {
-            console.error(err);
-            alert(err.response?.data?.error || "Failed to add member");
-        });
+        axios
+            .put("/projects/add-user", {
+                projectId,
+                users: [targetUserId],
+            })
+            .then((res) => {
+                setCollaborators(res.data.project.users || []);
+                alert("Member added to project!");
+            })
+            .catch((err) => {
+                console.error(err);
+                alert(err.response?.data?.error || "Failed to add member");
+            });
     };
 
     // File icon helper
     const getFileIcon = (filename) => {
-        const ext = filename.split('.').pop().toLowerCase();
+        const ext = filename.split(".").pop().toLowerCase();
         switch (ext) {
-            case 'js':
-            case 'jsx':
+            case "js":
+            case "jsx":
                 return <i className="ri-javascript-fill text-yellow-500 text-base"></i>;
-            case 'css':
+            case "css":
                 return <i className="ri-css3-fill text-blue-400 text-base"></i>;
-            case 'html':
+            case "html":
                 return <i className="ri-html5-fill text-orange-500 text-base"></i>;
-            case 'json':
+            case "json":
                 return <i className="ri-braces-line text-yellow-600 text-base"></i>;
-            case 'md':
+            case "md":
                 return <i className="ri-markdown-fill text-blue-400 text-base"></i>;
             default:
                 return <i className="ri-file-code-line text-gray-400 text-base"></i>;
@@ -313,14 +322,17 @@ const Project = () => {
         if (!text) return null;
         const parts = text.split(/(```[\s\S]*?```)/g);
         return parts.map((part, index) => {
-            if (part.startsWith('```') && part.endsWith('```')) {
+            if (part.startsWith("```") && part.endsWith("```")) {
                 const match = part.match(/```(\w*)\n([\s\S]*?)```/);
-                const language = match ? match[1] : '';
+                const language = match ? match[1] : "";
                 const code = match ? match[2] : part.slice(3, -3);
                 return (
-                    <div key={index} className="my-2.5 rounded-lg overflow-hidden border border-zinc-800 bg-zinc-950 font-mono text-[10.5px] text-left">
+                    <div
+                        key={index}
+                        className="my-2.5 rounded-lg overflow-hidden border border-zinc-800 bg-zinc-950 font-mono text-[10.5px] text-left"
+                    >
                         <div className="bg-zinc-900/80 px-3 py-1 flex justify-between items-center border-b border-zinc-850 text-zinc-400 text-[9px] uppercase font-bold tracking-wider">
-                            <span>{language || 'code'}</span>
+                            <span>{language || "code"}</span>
                             <button
                                 type="button"
                                 onClick={() => handleCopyToClipboard(code.trim())}
@@ -335,13 +347,17 @@ const Project = () => {
                     </div>
                 );
             }
-            return <span key={index} className="whitespace-pre-wrap leading-relaxed">{part}</span>;
+            return (
+                <span key={index} className="whitespace-pre-wrap leading-relaxed">
+                    {part}
+                </span>
+            );
         });
     };
 
     // Render Chat Messages
     const renderMessage = (msg, index) => {
-        const isAI = msg.sender?._id === 'ai';
+        const isAI = msg.sender?._id === "ai";
         const isMe = msg.sender?._id === user?._id;
 
         if (isAI) {
@@ -351,35 +367,47 @@ const Project = () => {
             let startCommand = null;
 
             try {
-                const parsed = typeof msg.message === 'string' ? JSON.parse(msg.message) : msg.message;
+                const parsed = typeof msg.message === "string" ? JSON.parse(msg.message) : msg.message;
                 aiText = parsed.text || "Generated updates";
                 if (parsed.fileTree) aiFiles = parsed.fileTree;
                 buildCommand = parsed.buildCommand;
                 startCommand = parsed.startCommand;
             } catch (e) {
-                aiText = typeof msg.message === 'string' ? msg.message : JSON.stringify(msg.message);
+                aiText = typeof msg.message === "string" ? msg.message : JSON.stringify(msg.message);
             }
 
             return (
-                <div key={index} className="flex flex-col mb-3 bg-zinc-900/20 border border-zinc-850/80 p-3 rounded-lg max-w-[90%] self-start text-left">
+                <div
+                    key={index}
+                    className="flex flex-col mb-3 bg-zinc-900/20 border border-zinc-850/80 p-3 rounded-lg max-w-[90%] self-start text-left"
+                >
                     <span className="text-[10px] font-bold text-zinc-400 mb-1 flex items-center gap-1 font-mono">
                         <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-pulse"></span>
                         <i className="ri-robot-2-line"></i> whisper-assistant
                     </span>
-                    <div className="text-[11px] text-zinc-300 leading-relaxed font-mono">{parseMessageText(aiText)}</div>
-                    
+                    <div className="text-[11px] text-zinc-300 leading-relaxed font-mono">
+                        {parseMessageText(aiText)}
+                    </div>
+
                     {Object.keys(aiFiles).length > 0 && (
                         <div className="mt-2.5 border-t border-zinc-900/60 pt-2">
-                            <span className="text-[10px] font-semibold text-zinc-400 block mb-1.5 font-mono">Created/Updated Files:</span>
+                            <span className="text-[10px] font-semibold text-zinc-400 block mb-1.5 font-mono">
+                                Created/Updated Files:
+                            </span>
                             <div className="space-y-1">
                                 {Object.keys(aiFiles).map((filename, i) => (
-                                    <div key={i} className="flex justify-between items-center bg-zinc-950/80 p-1.5 rounded border border-zinc-900">
+                                    <div
+                                        key={i}
+                                        className="flex justify-between items-center bg-zinc-950/80 p-1.5 rounded border border-zinc-900"
+                                    >
                                         <span className="text-[10px] font-mono text-zinc-350 flex items-center gap-1">
                                             {getFileIcon(filename)}
                                             {filename}
                                         </span>
                                         <button
-                                            onClick={() => handleCopyToClipboard(aiFiles[filename]?.file?.contents || "")}
+                                            onClick={() =>
+                                                handleCopyToClipboard(aiFiles[filename]?.file?.contents || "")
+                                            }
                                             className="p-1 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/30 rounded transition-colors"
                                             title="Copy File Contents"
                                         >
@@ -396,13 +424,17 @@ const Project = () => {
                             {buildCommand && (
                                 <div className="flex items-center gap-1">
                                     <span className="text-zinc-650 font-bold">$ </span>
-                                    <span>{buildCommand.mainItem} {buildCommand.commands?.join(" ")}</span>
+                                    <span>
+                                        {buildCommand.mainItem} {buildCommand.commands?.join(" ")}
+                                    </span>
                                 </div>
                             )}
                             {startCommand && (
                                 <div className="flex items-center gap-1">
                                     <span className="text-zinc-650 font-bold">$ </span>
-                                    <span>{startCommand.mainItem} {startCommand.commands?.join(" ")}</span>
+                                    <span>
+                                        {startCommand.mainItem} {startCommand.commands?.join(" ")}
+                                    </span>
                                 </div>
                             )}
                         </div>
@@ -412,12 +444,17 @@ const Project = () => {
         }
 
         return (
-            <div key={index} className={`flex flex-col mb-2.5 p-2.5 rounded-lg max-w-[85%] border font-mono ${
-                isMe 
-                    ? "bg-zinc-900/60 border-zinc-800 text-zinc-200 self-end text-left" 
-                    : "bg-zinc-950 border-zinc-900 text-zinc-300 self-start text-left"
-            }`}>
-                <span className={`text-[9px] font-bold mb-1 font-mono tracking-wide ${isMe ? "text-zinc-450" : "text-zinc-500"}`}>
+            <div
+                key={index}
+                className={`flex flex-col mb-2.5 p-2.5 rounded-lg max-w-[85%] border font-mono ${
+                    isMe
+                        ? "bg-zinc-900/60 border-zinc-800 text-zinc-200 self-end text-left"
+                        : "bg-zinc-950 border-zinc-900 text-zinc-300 self-start text-left"
+                }`}
+            >
+                <span
+                    className={`text-[9px] font-bold mb-1 font-mono tracking-wide ${isMe ? "text-zinc-450" : "text-zinc-500"}`}
+                >
                     {msg.sender?.email}
                 </span>
                 <div className="text-[11px] leading-relaxed whitespace-pre-wrap">{parseMessageText(msg.message)}</div>
@@ -433,8 +470,8 @@ const Project = () => {
             {/* Header */}
             <header className="h-14 border-b border-obsidian-850 px-4 flex justify-between items-center bg-obsidian-900 flex-shrink-0 relative z-10 shadow-sm">
                 <div className="flex items-center gap-3">
-                    <button 
-                        onClick={() => navigate('/')}
+                    <button
+                        onClick={() => navigate("/")}
                         className="p-2 bg-obsidian-950 hover:bg-obsidian-800 text-obsidian-300 hover:text-white rounded-xl border border-obsidian-800 transition-all duration-200 flex items-center justify-center shadow-sm"
                         title="Back to Dashboard"
                     >
@@ -444,7 +481,7 @@ const Project = () => {
                         <i className="ri-folder-line text-accent-violet"></i> {project?.name || "loading..."}
                     </h1>
                 </div>
-                
+
                 <div className="flex items-center gap-3 text-xs font-mono">
                     <div className="flex items-center gap-2 text-obsidian-300 bg-obsidian-950 px-3 py-1.5 rounded-xl border border-obsidian-850 shadow-inner">
                         <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
@@ -454,8 +491,8 @@ const Project = () => {
                     <button
                         onClick={() => setIsChatOpen(!isChatOpen)}
                         className={`p-1.5 rounded-xl border transition-all duration-200 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs ${
-                            isChatOpen 
-                                ? "bg-white text-obsidian-950 border-white hover:bg-obsidian-100 shadow-md font-bold" 
+                            isChatOpen
+                                ? "bg-white text-obsidian-950 border-white hover:bg-obsidian-100 shadow-md font-bold"
                                 : "bg-obsidian-900 text-obsidian-300 border-obsidian-800 hover:text-white"
                         }`}
                         title={isChatOpen ? "Collapse Chat & AI" : "Expand Chat & AI"}
@@ -474,7 +511,7 @@ const Project = () => {
                         {/* Explorer icon */}
                         <div className="relative group w-full flex justify-center">
                             <div className="absolute left-0 top-1 w-1 h-6 bg-accent-violet rounded-r-md"></div>
-                            <div 
+                            <div
                                 className="w-9 h-9 rounded-xl flex items-center justify-center text-white bg-obsidian-950 border border-obsidian-850 shadow-inner cursor-pointer"
                                 title="Explorer"
                             >
@@ -483,11 +520,11 @@ const Project = () => {
                         </div>
 
                         {/* Chat icon indicator inside Activity Bar */}
-                        <div 
+                        <div
                             onClick={() => setIsChatOpen(!isChatOpen)}
                             className={`w-9 h-9 rounded-xl flex items-center justify-center cursor-pointer transition-all duration-250 border ${
-                                isChatOpen 
-                                    ? "text-white bg-obsidian-950 border-obsidian-800 shadow-inner" 
+                                isChatOpen
+                                    ? "text-white bg-obsidian-950 border-obsidian-800 shadow-inner"
                                     : "text-obsidian-500 hover:text-obsidian-200 hover:bg-obsidian-850 border-transparent"
                             }`}
                             title="Toggle Chat & AI"
@@ -496,7 +533,7 @@ const Project = () => {
                         </div>
 
                         {/* Invite modal trigger inside Activity Bar */}
-                        <div 
+                        <div
                             onClick={handleOpenInviteModal}
                             className="w-9 h-9 rounded-xl flex items-center justify-center text-obsidian-500 hover:text-obsidian-200 hover:bg-obsidian-850 border border-transparent cursor-pointer transition-all duration-250"
                             title="Add Collaborator"
@@ -504,10 +541,10 @@ const Project = () => {
                             <i className="ri-user-add-line text-base"></i>
                         </div>
                     </div>
-                    
+
                     <div className="flex flex-col items-center gap-4">
                         {/* User initials representation */}
-                        <div 
+                        <div
                             className="w-8 h-8 rounded-full bg-obsidian-950 border border-obsidian-850 flex items-center justify-center text-[10px] font-bold text-obsidian-400 font-mono uppercase cursor-default shadow-inner"
                             title={user?.email}
                         >
@@ -531,7 +568,7 @@ const Project = () => {
                                 placeholder="Search files..."
                             />
                             {fileSearchQuery && (
-                                <button 
+                                <button
                                     onClick={() => setFileSearchQuery("")}
                                     className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-obsidian-400 hover:text-white"
                                 >
@@ -544,8 +581,10 @@ const Project = () => {
                     {/* Files Section */}
                     <div className="flex-1 flex flex-col overflow-hidden min-h-[150px] bg-obsidian-900/10">
                         <div className="p-3 pb-1.5 flex justify-between items-center">
-                            <span className="text-[10px] font-bold text-obsidian-400 tracking-widest uppercase font-mono">Files</span>
-                            <button 
+                            <span className="text-[10px] font-bold text-obsidian-400 tracking-widest uppercase font-mono">
+                                Files
+                            </span>
+                            <button
                                 onClick={handleCreateFile}
                                 className="w-5 h-5 bg-obsidian-950 hover:bg-obsidian-800 border border-obsidian-800 text-obsidian-300 hover:text-white rounded-lg transition-colors flex items-center justify-center shadow-sm"
                                 title="Create File"
@@ -553,24 +592,28 @@ const Project = () => {
                                 <i className="ri-file-add-line text-xs"></i>
                             </button>
                         </div>
-                        
+
                         <div className="flex-1 overflow-y-auto p-2 space-y-0.5 scroll-container">
-                            {Object.keys(fileTree).filter(filename => 
+                            {Object.keys(fileTree).filter((filename) =>
                                 filename.toLowerCase().includes(fileSearchQuery.toLowerCase())
                             ).length === 0 ? (
                                 <div className="text-center text-[10px] text-obsidian-500 py-8 font-mono">
-                                    {Object.keys(fileTree).length === 0 ? "No files inside project." : "No files matched."}
+                                    {Object.keys(fileTree).length === 0
+                                        ? "No files inside project."
+                                        : "No files matched."}
                                 </div>
                             ) : (
                                 Object.keys(fileTree)
-                                    .filter(filename => filename.toLowerCase().includes(fileSearchQuery.toLowerCase()))
+                                    .filter((filename) =>
+                                        filename.toLowerCase().includes(fileSearchQuery.toLowerCase())
+                                    )
                                     .map((filename) => (
                                         <div
                                             key={filename}
                                             onClick={() => handleOpenFile(filename)}
                                             className={`w-full group/file flex items-center justify-between px-2.5 py-2 text-[11px] font-mono rounded-lg transition-all cursor-pointer border ${
-                                                selectedFile === filename 
-                                                    ? "bg-obsidian-950 text-white border-obsidian-800 shadow-sm" 
+                                                selectedFile === filename
+                                                    ? "bg-obsidian-950 text-white border-obsidian-800 shadow-sm"
                                                     : "text-obsidian-350 hover:text-white hover:bg-obsidian-850/50 border-transparent"
                                             }`}
                                         >
@@ -593,12 +636,14 @@ const Project = () => {
 
                     {/* Collaborators Collapsible Section */}
                     <div className="border-t border-obsidian-850 bg-obsidian-900 flex flex-col flex-shrink-0 shadow-inner">
-                        <div 
+                        <div
                             onClick={() => setIsCollabSectionCollapsed(!isCollabSectionCollapsed)}
                             className="p-3 flex justify-between items-center cursor-pointer select-none hover:bg-obsidian-850/30 transition-colors"
                         >
                             <div className="flex items-center gap-1.5">
-                                <i className={`text-obsidian-500 text-xs transition-transform duration-200 ${isCollabSectionCollapsed ? "ri-arrow-right-s-line" : "ri-arrow-down-s-line"}`}></i>
+                                <i
+                                    className={`text-obsidian-500 text-xs transition-transform duration-200 ${isCollabSectionCollapsed ? "ri-arrow-right-s-line" : "ri-arrow-down-s-line"}`}
+                                ></i>
                                 <span className="text-[10px] font-bold text-obsidian-450 tracking-widest uppercase font-mono">
                                     Collaborators
                                 </span>
@@ -606,7 +651,7 @@ const Project = () => {
                                     {collaborators.length}
                                 </span>
                             </div>
-                            <button 
+                            <button
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     handleOpenInviteModal();
@@ -617,16 +662,27 @@ const Project = () => {
                                 <i className="ri-user-add-line text-xs"></i>
                             </button>
                         </div>
-                        
+
                         {!isCollabSectionCollapsed && (
                             <div className="max-h-48 overflow-y-auto p-2 pt-0 space-y-1 scroll-container border-t border-obsidian-850/30">
                                 {collaborators.map((c) => (
-                                    <div key={c._id} className="flex items-center gap-2 p-1.5 bg-obsidian-900/20 rounded-lg border border-transparent hover:border-obsidian-800 hover:bg-obsidian-850/35 transition-all duration-150">
+                                    <div
+                                        key={c._id}
+                                        className="flex items-center gap-2 p-1.5 bg-obsidian-900/20 rounded-lg border border-transparent hover:border-obsidian-800 hover:bg-obsidian-850/35 transition-all duration-150"
+                                    >
                                         <div className="w-5 h-5 rounded-lg bg-obsidian-950 border border-obsidian-800 flex items-center justify-center font-bold text-[9px] text-obsidian-400 uppercase font-mono shadow-sm">
                                             {c.email.slice(0, 2)}
                                         </div>
-                                        <span className="text-[10.5px] text-obsidian-350 font-mono truncate flex-1" title={c.email}>{c.email}</span>
-                                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full flex-shrink-0 animate-pulse" title="Online"></span>
+                                        <span
+                                            className="text-[10.5px] text-obsidian-350 font-mono truncate flex-1"
+                                            title={c.email}
+                                        >
+                                            {c.email}
+                                        </span>
+                                        <span
+                                            className="w-1.5 h-1.5 bg-emerald-500 rounded-full flex-shrink-0 animate-pulse"
+                                            title="Online"
+                                        ></span>
                                     </div>
                                 ))}
                             </div>
@@ -648,14 +704,14 @@ const Project = () => {
                                                 key={filename}
                                                 onClick={() => handleOpenFile(filename)}
                                                 className={`group/tab h-full flex items-center gap-2 px-3.5 border-r border-zinc-900 cursor-pointer transition-all text-[11px] font-mono relative ${
-                                                    isActive 
-                                                        ? "bg-black text-white border-t-2 border-t-white font-semibold" 
+                                                    isActive
+                                                        ? "bg-black text-white border-t-2 border-t-white font-semibold"
                                                         : "bg-zinc-950/40 text-zinc-450 hover:text-zinc-200 hover:bg-zinc-900/20"
                                                 }`}
                                             >
                                                 {getFileIcon(filename)}
                                                 <span className="truncate max-w-[120px]">{filename}</span>
-                                                
+
                                                 {/* Unsaved status dot or Close cross button */}
                                                 {isUnsaved && isActive ? (
                                                     <span className="w-2 h-2 rounded-full bg-yellow-500 flex-shrink-0 group-hover/tab:hidden"></span>
@@ -676,20 +732,20 @@ const Project = () => {
                                         );
                                     })}
                                 </div>
-                                
+
                                 {/* Save Action Button aligned with tab strip */}
                                 <div className="flex items-center gap-2 flex-shrink-0 pl-2">
                                     {selectedFile && (
                                         <button
                                             onClick={handleSaveFile}
                                             className={`flex items-center gap-1 text-[11px] px-2.5 py-1 rounded transition-all font-mono font-bold shadow-sm ${
-                                                isUnsaved 
-                                                    ? "bg-white hover:bg-zinc-200 text-black" 
+                                                isUnsaved
+                                                    ? "bg-white hover:bg-zinc-200 text-black"
                                                     : "bg-zinc-900 text-zinc-550 cursor-not-allowed border border-zinc-850"
                                             }`}
                                             disabled={!isUnsaved}
                                         >
-                                            <i className="ri-save-line text-xs"></i> 
+                                            <i className="ri-save-line text-xs"></i>
                                             <span>Save</span>
                                         </button>
                                     )}
@@ -711,7 +767,7 @@ const Project = () => {
                                         automaticLayout: true,
                                         scrollBeyondLastLine: false,
                                         fontSize: 13,
-                                        minimap: { enabled: false }
+                                        minimap: { enabled: false },
                                     }}
                                 />
                             ) : (
@@ -719,7 +775,9 @@ const Project = () => {
                                     <div className="w-12 h-12 rounded-lg bg-zinc-900/50 flex items-center justify-center mb-3 border border-zinc-800 shadow-sm">
                                         <i className="ri-file-code-line text-2xl text-zinc-500"></i>
                                     </div>
-                                    <h3 className="text-xs font-bold text-zinc-300 tracking-tight font-mono">No active tab selected</h3>
+                                    <h3 className="text-xs font-bold text-zinc-300 tracking-tight font-mono">
+                                        No active tab selected
+                                    </h3>
                                     <p className="text-[10px] text-zinc-500 max-w-xs mt-1 font-mono leading-relaxed">
                                         Select an open file from your tab strip or folder tree.
                                     </p>
@@ -731,27 +789,35 @@ const Project = () => {
                             <div className="w-14 h-14 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center mb-4 shadow-xl">
                                 <i className="ri-code-s-slash-line text-2xl text-zinc-400"></i>
                             </div>
-                            <h3 className="text-sm font-bold text-zinc-200 tracking-tight font-mono">whisper-sandbox</h3>
+                            <h3 className="text-sm font-bold text-zinc-200 tracking-tight font-mono">
+                                whisper-sandbox
+                            </h3>
                             <p className="text-[11px] text-zinc-500 max-w-sm mt-1.5 font-mono leading-relaxed">
                                 Select or create a file from the explorer pane to start coding collaboratively.
                             </p>
                             <div className="mt-6 flex flex-col gap-2 max-w-xs w-full text-left bg-zinc-950/50 p-4 rounded-lg border border-zinc-900 font-mono text-[10.5px] text-zinc-450">
-                                <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block mb-1">Quick Actions</span>
-                                <button 
+                                <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block mb-1">
+                                    Quick Actions
+                                </span>
+                                <button
                                     onClick={handleCreateFile}
                                     className="flex items-center gap-2 hover:text-white transition-colors"
                                 >
-                                    <span className="w-4 flex justify-center"><i className="ri-file-add-line"></i></span>
+                                    <span className="w-4 flex justify-center">
+                                        <i className="ri-file-add-line"></i>
+                                    </span>
                                     <span>Create new file</span>
                                 </button>
-                                <button 
+                                <button
                                     onClick={handleOpenInviteModal}
                                     className="flex items-center gap-2 hover:text-white transition-colors"
                                 >
-                                    <span className="w-4 flex justify-center"><i className="ri-user-add-line"></i></span>
+                                    <span className="w-4 flex justify-center">
+                                        <i className="ri-user-add-line"></i>
+                                    </span>
                                     <span>Add team member</span>
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => {
                                         setIsChatOpen(true);
                                         setTimeout(() => {
@@ -760,7 +826,9 @@ const Project = () => {
                                     }}
                                     className="flex items-center gap-2 hover:text-white transition-colors"
                                 >
-                                    <span className="w-4 flex justify-center"><i className="ri-message-3-line"></i></span>
+                                    <span className="w-4 flex justify-center">
+                                        <i className="ri-message-3-line"></i>
+                                    </span>
                                     <span>Open workspace chat</span>
                                 </button>
                             </div>
@@ -772,13 +840,15 @@ const Project = () => {
                 {isChatOpen && (
                     <section className="w-80 bg-zinc-950 flex flex-col flex-shrink-0 border-l border-zinc-800">
                         <div className="p-3 border-b border-zinc-800 flex items-center justify-between bg-zinc-950">
-                            <span className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase font-mono">Chatroom & AI</span>
+                            <span className="text-[10px] font-bold text-zinc-400 tracking-wider uppercase font-mono">
+                                Chatroom & AI
+                            </span>
                             <div className="flex items-center gap-3">
                                 <div className="flex items-center gap-1 text-[10px] text-zinc-550 bg-zinc-900/60 px-2 py-0.5 rounded font-mono border border-zinc-900">
                                     <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
                                     <span>Live</span>
                                 </div>
-                                <button 
+                                <button
                                     onClick={() => setIsChatOpen(false)}
                                     className="text-zinc-550 hover:text-zinc-300 p-0.5 rounded"
                                     title="Close Panel"
@@ -794,8 +864,14 @@ const Project = () => {
                                 <div className="my-auto text-center text-[11px] text-zinc-550 px-4 font-mono leading-relaxed">
                                     <p className="mb-2">No messages yet.</p>
                                     <div className="bg-zinc-900/20 p-3 rounded-lg border border-zinc-900 text-left">
-                                        <strong className="text-zinc-450 block mb-1 font-bold text-[10px]"><i className="ri-lightbulb-line text-zinc-500"></i> AI Prompts</strong>
-                                        Type <code className="text-zinc-300 bg-zinc-900 px-1 py-0.5 rounded border border-zinc-850">@ai Create web app</code> to prompt the model.
+                                        <strong className="text-zinc-450 block mb-1 font-bold text-[10px]">
+                                            <i className="ri-lightbulb-line text-zinc-500"></i> AI Prompts
+                                        </strong>
+                                        Type{" "}
+                                        <code className="text-zinc-300 bg-zinc-900 px-1 py-0.5 rounded border border-zinc-850">
+                                            @ai Create web app
+                                        </code>{" "}
+                                        to prompt the model.
                                     </div>
                                 </div>
                             )}
@@ -855,7 +931,7 @@ const Project = () => {
                     <div className="bg-zinc-950 border border-zinc-800 p-6 rounded-xl shadow-2xl w-full max-w-sm animate-in fade-in zoom-in-95 duration-200">
                         <div className="flex justify-between items-center mb-5">
                             <h2 className="text-sm font-bold text-white tracking-tight font-mono">Add Collaborator</h2>
-                            <button 
+                            <button
                                 onClick={() => {
                                     setIsInviteModalOpen(false);
                                     setSearchQuery("");
@@ -865,7 +941,7 @@ const Project = () => {
                                 <i className="ri-close-line text-lg"></i>
                             </button>
                         </div>
-                        
+
                         <div className="mb-4">
                             <input
                                 value={searchQuery}
@@ -877,14 +953,21 @@ const Project = () => {
 
                         <div className="max-h-60 overflow-y-auto space-y-1.5 mb-2 scroll-container">
                             {allUsers
-                                .filter(u => u.email.toLowerCase().includes(searchQuery.toLowerCase()))
+                                .filter((u) => u.email.toLowerCase().includes(searchQuery.toLowerCase()))
                                 .map((u) => {
-                                    const isAlreadyMember = collaborators.some(collab => collab._id === u._id);
+                                    const isAlreadyMember = collaborators.some((collab) => collab._id === u._id);
                                     return (
-                                        <div key={u._id} className="flex justify-between items-center p-2 bg-zinc-900/50 rounded-lg border border-zinc-900 font-mono">
-                                            <span className="text-[11px] text-zinc-450 truncate mr-2" title={u.email}>{u.email}</span>
+                                        <div
+                                            key={u._id}
+                                            className="flex justify-between items-center p-2 bg-zinc-900/50 rounded-lg border border-zinc-900 font-mono"
+                                        >
+                                            <span className="text-[11px] text-zinc-450 truncate mr-2" title={u.email}>
+                                                {u.email}
+                                            </span>
                                             {isAlreadyMember ? (
-                                                <span className="text-[9px] text-zinc-500 bg-zinc-900 border border-zinc-850 px-2 py-0.5 rounded">Member</span>
+                                                <span className="text-[9px] text-zinc-500 bg-zinc-900 border border-zinc-850 px-2 py-0.5 rounded">
+                                                    Member
+                                                </span>
                                             ) : (
                                                 <button
                                                     onClick={() => handleAddCollaborator(u._id)}
