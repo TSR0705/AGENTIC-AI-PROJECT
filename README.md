@@ -9,6 +9,7 @@ Whisper Sandbox is a production-grade, collaborative web-based sandbox workspace
 - **Real-Time Collaboration**: Edit files and synchronize changes in real-time with team developers via WebSockets.
 - **Unified IDE Workspace**: Single-sidebar files explorer and collapsible team member drawer with active online presence indicators.
 - **Sleek Multi-Tab Interface**: Open files in independent tabs with unsaved change markers and quick closing behavior.
+- **Monaco Editor Integration**: Replace the raw `<textarea>` with the high-performance `@monaco-editor/react` library, bringing syntax highlighting, auto-indentation, and matching bracket highlighting to the workspace.
 - **Embedded AI Coding Assistant**: Inline prompting via `@ai` handles debugging, code explanations, and automatic code file tree generation.
 - **Fail-Safe Observability**: Winston structured logging, request correlation tracking, and isolated health checks.
 
@@ -18,7 +19,7 @@ Whisper Sandbox is a production-grade, collaborative web-based sandbox workspace
 
 The sandbox follows a decoupled client-server architecture:
 
-- **Frontend**: Single Page Application built on React, Vite, TailwindCSS, and Socket.io-client.
+- **Frontend**: Single Page Application built on React, Vite, TailwindCSS, `@monaco-editor/react`, and Socket.io-client.
 - **Backend**: REST API and Websocket server built on Node.js, Express, Socket.io, Mongoose (MongoDB), and ioredis (Redis).
 - **Core Integrations**: Google Gemini API for AI code recommendations.
 
