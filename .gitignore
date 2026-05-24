@@ -17,7 +17,10 @@ lerna-debug.log*
 dist/
 dist-ssr/
 coverage/
-package-lock.json
+
+# Lock files - only ignore root level, keep subdirectory ones
+/package-lock.json
+/npm-shrinkwrap.json
 
 # Editor files
 .vscode/
