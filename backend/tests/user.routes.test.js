@@ -1,26 +1,39 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import request from "supertest";
 import mongoose from "mongoose";
-import { MongoMemoryServer } from "mongodb-memory-server";
 import User from "../models/user.model.js";
 
-let mongoServer;
 let app;
 
 beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const uri = mongoServer.getUri();
-    process.env.MONGODB_URI = uri;
-    process.env.JWT_SECRET = "test_super_secret";
+    // Set env vars before importing app (for env.js Proxy to pick them up)
+    if (!process.env.MONGODB_URI || process.env.MONGODB_URI.includes("localhost:27017/test-db")) {
+        // Already set by CI env or vitest config — use as-is
+    }
+    process.env.JWT_SECRET = process.env.JWT_SECRET || "test_super_secret";
 
-    // Dynamic import to ensure process.env.MONGODB_URI is set before db/db.js connect runs
+    // Import app after env is configured — connect() is called inside app.js
     const appModule = await import("../app.js");
     app = appModule.default;
-});
+
+    // Wait for mongoose to actually connect
+    if (mongoose.connection.readyState !== 1) {
+        await new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => reject(new Error("MongoDB connection timeout")), 15000);
+            mongoose.connection.once("open", () => {
+                clearTimeout(timeout);
+                resolve();
+            });
+            mongoose.connection.once("error", (err) => {
+                clearTimeout(timeout);
+                reject(err);
+            });
+        });
+    }
+}, 30000);
 
 afterAll(async () => {
     await mongoose.disconnect();
-    await mongoServer.stop();
 });
 
 beforeEach(async () => {
