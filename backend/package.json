@@ -30,7 +30,6 @@
         "socket.io": "^4.8.3"
     },
     "devDependencies": {
-        "mongodb-memory-server": "^10.1.2",
         "supertest": "^7.0.0",
         "vitest": "^2.1.8"
     }
