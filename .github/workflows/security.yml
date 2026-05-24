@@ -21,6 +21,10 @@ jobs:
         with:
           node-version: 22.x
           cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
+            backend/package-lock.json
 
       - name: Run Dependency Vulnerability Check
         run: npm audit --audit-level=high

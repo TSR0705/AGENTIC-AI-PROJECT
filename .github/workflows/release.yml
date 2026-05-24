@@ -23,6 +23,10 @@ jobs:
         with:
           node-version: 22.x
           cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
+            backend/package-lock.json
 
       - name: Install Dependencies
         run: npm install
