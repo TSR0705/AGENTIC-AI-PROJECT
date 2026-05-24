@@ -3,6 +3,17 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+// Provide test-safe defaults when running tests
+const isTest = process.env.NODE_ENV === "test" || process.env.VITEST;
+
+const testDefaults = isTest
+    ? {
+          MONGODB_URI: "mongodb://localhost:27017/test-db",
+          JWT_SECRET: "test-secret-key-min-8-chars",
+          GOOGLE_AI_KEY: "test-google-ai-key",
+      }
+    : {};
+
 const envSchema = z.object({
     PORT: z.coerce.number().default(3000),
     MONGODB_URI: z.string().url("MONGODB_URI must be a valid connection URL"),
@@ -14,7 +25,7 @@ const envSchema = z.object({
     CORS_ORIGIN: z.string().default("*"),
 });
 
-const parsed = envSchema.safeParse(process.env);
+const parsed = envSchema.safeParse({ ...testDefaults, ...process.env });
 
 if (!parsed.success) {
     console.error("❌ Invalid environment variables configuration:\n", JSON.stringify(parsed.error.format(), null, 2));
