@@ -1,4 +1,5 @@
-import Redis from 'ioredis';
+import Redis from "ioredis";
+import { env } from "../config/env.js";
 
 let client;
 let useMemoryDb = false;
@@ -6,25 +7,25 @@ const memoryDb = new Map();
 
 try {
     client = new Redis({
-        host: process.env.REDIS_HOST || '127.0.0.1',
-        port: process.env.REDIS_PORT || 6379,
-        password: process.env.REDIS_PASSWORD || undefined,
+        host: env.REDIS_HOST,
+        port: env.REDIS_PORT,
+        password: env.REDIS_PASSWORD || undefined,
         maxRetriesPerRequest: 1, // fail fast so we fall back
-        showFriendlyErrorStack: true
+        showFriendlyErrorStack: true,
     });
 
-    client.on('error', (err) => {
+    client.on("error", (err) => {
         if (!useMemoryDb) {
-            console.warn('Redis connection error. Falling back to in-memory storage for blacklisted tokens.');
+            console.warn("Redis connection error. Falling back to in-memory storage for blacklisted tokens.");
             useMemoryDb = true;
         }
     });
 
-    client.on('connect', () => {
-        console.log('Redis connected successfully');
+    client.on("connect", () => {
+        console.log("Redis connected successfully");
     });
 } catch (error) {
-    console.warn('Could not initialize Redis. Falling back to in-memory storage.');
+    console.warn("Could not initialize Redis. Falling back to in-memory storage.");
     useMemoryDb = true;
 }
 
@@ -43,10 +44,10 @@ const redisClient = {
     async set(key, value, mode, duration) {
         if (useMemoryDb) {
             memoryDb.set(key, value);
-            if (mode === 'EX' && duration) {
+            if (mode === "EX" && duration) {
                 setTimeout(() => memoryDb.delete(key), duration * 1000);
             }
-            return 'OK';
+            return "OK";
         }
         try {
             if (mode && duration) {
@@ -56,12 +57,12 @@ const redisClient = {
         } catch (err) {
             useMemoryDb = true;
             memoryDb.set(key, value);
-            if (mode === 'EX' && duration) {
+            if (mode === "EX" && duration) {
                 setTimeout(() => memoryDb.delete(key), duration * 1000);
             }
-            return 'OK';
+            return "OK";
         }
-    }
+    },
 };
 
 export default redisClient;
