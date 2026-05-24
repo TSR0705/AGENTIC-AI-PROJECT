@@ -1,7 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { env } from "../config/env.js";
 
-
 const genAI = new GoogleGenerativeAI(env.GOOGLE_AI_KEY);
 const model = genAI.getGenerativeModel({
     model: "gemini-2.5-flash",
@@ -49,7 +48,7 @@ const model = genAI.getGenerativeModel({
                     "version": "1.0.0",
                     "main": "index.js",
                     "scripts": {
-                        "test": "echo \"Error: no test specified\" && exit 1"
+                        "test": "echo "Error: no test specified" && exit 1"
                     },
                     "keywords": [],
                     "author": "",
@@ -99,12 +98,11 @@ const model = genAI.getGenerativeModel({
  IMPORTANT : don't use file name like routes/index.js
        
        
-    `
+    `,
 });
 
 export const generateResult = async (prompt) => {
-
     const result = await model.generateContent(prompt);
 
-    return result.response.text()
-}
+    return result.response.text();
+};
