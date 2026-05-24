@@ -1,0 +1,31 @@
+{
+    "name": "agentic-ai-project-workspace",
+    "version": "1.0.0",
+    "description": "Production-grade collaborative sandbox workspace",
+    "private": true,
+    "scripts": {
+        "prepare": "husky",
+        "lint": "eslint \"**/*.{js,jsx}\"",
+        "format": "prettier --write \"**/*.{js,jsx,json,css,md}\"",
+        "format:check": "prettier --check \"**/*.{js,jsx,json,css,md}\"",
+        "test:backend": "npm run test --prefix backend",
+        "test:frontend": "npm run test --prefix frontend"
+    },
+    "devDependencies": {
+        "@commitlint/cli": "^19.3.0",
+        "@commitlint/config-conventional": "^19.2.2",
+        "eslint": "^9.15.0",
+        "husky": "^9.0.11",
+        "lint-staged": "^15.2.5",
+        "prettier": "^3.3.3"
+    },
+    "lint-staged": {
+        "**/*.{js,jsx}": [
+            "eslint --fix",
+            "prettier --write"
+        ],
+        "**/*.{json,css,md}": [
+            "prettier --write"
+        ]
+    }
+}

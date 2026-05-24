@@ -1,0 +1,46 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-workspace:
+    name: Lint, Test, & Build
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [ 20.x, 22.x ]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install Workspace Dependencies
+        run: npm install
+
+      - name: Run Workspace Format & Lint Check
+        run: |
+          npm run format:check
+          npm run lint
+
+      - name: Install Frontend Dependencies
+        run: npm install --prefix frontend
+
+      - name: Validate Frontend Production Build
+        run: npm run build --prefix frontend
+
+      - name: Install Backend Dependencies
+        run: npm install --prefix backend
+
+      - name: Execute Backend Vitest Suite
+        run: npm run test --prefix backend
