@@ -38,9 +38,9 @@ const ProtectedRoute = ({ children }) => {
 
     if (loading) {
         return (
-            <div className="h-screen w-screen bg-gray-950 flex flex-col items-center justify-center text-white">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mb-4"></div>
-                <p className="text-gray-400 text-sm tracking-wider font-medium animate-pulse">Verifying Session...</p>
+            <div className="h-screen w-screen bg-black flex flex-col items-center justify-center text-white font-sans">
+                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-zinc-200 mb-4"></div>
+                <p className="text-zinc-400 text-xs tracking-widest font-mono uppercase animate-pulse">verifying-session</p>
             </div>
         );
     }
