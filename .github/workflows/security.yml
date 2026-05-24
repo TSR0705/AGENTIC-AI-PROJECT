@@ -27,7 +27,11 @@ jobs:
             backend/package-lock.json
 
       - name: Run Dependency Vulnerability Check
-        run: npm audit --audit-level=high
+        run: |
+          echo "Auditing frontend dependencies..."
+          npm audit --audit-level=high --prefix frontend
+          echo "Auditing backend dependencies..."
+          npm audit --audit-level=high --prefix backend
 
   secret-scanning:
     name: Secret Leak Detection
