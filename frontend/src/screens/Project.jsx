@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { UserContext } from '../context/user.context';
 import axios from '../config/axios';
 import { io } from 'socket.io-client';
+import Editor from '@monaco-editor/react';
 
 const Project = () => {
     const { projectId } = useParams();
@@ -33,33 +34,34 @@ const Project = () => {
     // Refs
     const socketRef = useRef(null);
     const messagesEndRef = useRef(null);
-    const gutterRef = useRef(null);
-    const textareaRef = useRef(null);
 
-    // Sync scrolling between textarea and line gutter
-    const handleScroll = (e) => {
-        if (gutterRef.current) {
-            gutterRef.current.scrollTop = e.target.scrollTop;
+    // Monaco language mapping helper
+    const getLanguageFromFilename = (filename) => {
+        if (!filename) return 'plaintext';
+        const ext = filename.split('.').pop().toLowerCase();
+        switch (ext) {
+            case 'js':
+            case 'jsx':
+                return 'javascript';
+            case 'ts':
+            case 'tsx':
+                return 'typescript';
+            case 'css':
+                return 'css';
+            case 'html':
+                return 'html';
+            case 'json':
+                return 'json';
+            case 'md':
+                return 'markdown';
+            case 'py':
+                return 'python';
+            default:
+                return 'plaintext';
         }
     };
 
-    // Enable indentation with Tab key inside textarea
-    const handleKeyDown = (e) => {
-        if (e.key === 'Tab') {
-            e.preventDefault();
-            const start = e.target.selectionStart;
-            const end = e.target.selectionEnd;
-            const tabChar = "    ";
-            const newContent = editorContent.substring(0, start) + tabChar + editorContent.substring(end);
-            setEditorContent(newContent);
-            setIsUnsaved(true);
-            setTimeout(() => {
-                if (textareaRef.current) {
-                    textareaRef.current.selectionStart = textareaRef.current.selectionEnd = start + tabChar.length;
-                }
-            }, 0);
-        }
-    };
+
 
     // Fetch Project Details and Users
     useEffect(() => {
@@ -424,34 +426,37 @@ const Project = () => {
     };
 
     return (
-        <main className="h-screen w-screen bg-black text-zinc-100 flex flex-col overflow-hidden font-sans">
+        <main className="h-screen w-screen bg-obsidian-950 text-obsidian-100 flex flex-col overflow-hidden font-sans relative">
+            {/* Top-center ambient indigo glow */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-accent-violet/5 rounded-full blur-[100px] pointer-events-none z-0"></div>
+
             {/* Header */}
-            <header className="h-12 border-b border-zinc-800 px-4 flex justify-between items-center bg-zinc-950 flex-shrink-0 relative z-10">
+            <header className="h-14 border-b border-obsidian-850 px-4 flex justify-between items-center bg-obsidian-900 flex-shrink-0 relative z-10 shadow-sm">
                 <div className="flex items-center gap-3">
                     <button 
                         onClick={() => navigate('/')}
-                        className="p-1.5 bg-zinc-900 hover:bg-zinc-850 text-zinc-400 hover:text-white rounded-lg border border-zinc-805 transition-colors flex items-center justify-center"
+                        className="p-2 bg-obsidian-950 hover:bg-obsidian-800 text-obsidian-300 hover:text-white rounded-xl border border-obsidian-800 transition-all duration-200 flex items-center justify-center shadow-sm"
                         title="Back to Dashboard"
                     >
                         <i className="ri-arrow-left-line text-sm"></i>
                     </button>
-                    <h1 className="text-xs font-semibold tracking-tight capitalize flex items-center gap-2 text-zinc-200 font-mono">
-                        <i className="ri-folder-line text-zinc-500"></i> {project?.name || "loading..."}
+                    <h1 className="text-xs font-bold tracking-tight capitalize flex items-center gap-2 text-white font-mono">
+                        <i className="ri-folder-line text-accent-violet"></i> {project?.name || "loading..."}
                     </h1>
                 </div>
                 
                 <div className="flex items-center gap-3 text-xs font-mono">
-                    <div className="flex items-center gap-1.5 text-zinc-500 bg-zinc-900/60 px-2.5 py-1 rounded-md border border-zinc-900">
+                    <div className="flex items-center gap-2 text-obsidian-300 bg-obsidian-950 px-3 py-1.5 rounded-xl border border-obsidian-850 shadow-inner">
                         <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
                         <span>{user?.email}</span>
                     </div>
                     {/* Toggle Chat Button */}
                     <button
                         onClick={() => setIsChatOpen(!isChatOpen)}
-                        className={`p-1.5 rounded-lg border transition-colors flex items-center justify-center gap-1.5 px-2.5 py-1 ${
+                        className={`p-1.5 rounded-xl border transition-all duration-200 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs ${
                             isChatOpen 
-                                ? "bg-white text-black border-white hover:bg-zinc-200" 
-                                : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white"
+                                ? "bg-white text-obsidian-950 border-white hover:bg-obsidian-100 shadow-md font-bold" 
+                                : "bg-obsidian-900 text-obsidian-300 border-obsidian-800 hover:text-white"
                         }`}
                         title={isChatOpen ? "Collapse Chat & AI" : "Expand Chat & AI"}
                     >
@@ -462,33 +467,38 @@ const Project = () => {
             </header>
 
             {/* Editor Workspace Panels */}
-            <div className="flex-1 flex overflow-hidden">
+            <div className="flex-1 flex overflow-hidden relative z-10">
                 {/* 1. Activity Bar (Left-most vertical strip) */}
-                <aside className="w-12 border-r border-zinc-800 bg-zinc-950 flex flex-col justify-between items-center py-4 flex-shrink-0 select-none">
-                    <div className="flex flex-col items-center gap-4">
+                <aside className="w-14 border-r border-obsidian-850 bg-obsidian-900 flex flex-col justify-between items-center py-4 flex-shrink-0 select-none shadow-sm">
+                    <div className="flex flex-col items-center gap-4 w-full">
                         {/* Explorer icon */}
-                        <div 
-                            className="w-8 h-8 rounded-lg flex items-center justify-center text-white bg-zinc-900 border border-zinc-800 cursor-pointer"
-                            title="Explorer"
-                        >
-                            <i className="ri-file-code-line text-base"></i>
+                        <div className="relative group w-full flex justify-center">
+                            <div className="absolute left-0 top-1 w-1 h-6 bg-accent-violet rounded-r-md"></div>
+                            <div 
+                                className="w-9 h-9 rounded-xl flex items-center justify-center text-white bg-obsidian-950 border border-obsidian-850 shadow-inner cursor-pointer"
+                                title="Explorer"
+                            >
+                                <i className="ri-file-code-line text-base text-accent-violet"></i>
+                            </div>
                         </div>
+
                         {/* Chat icon indicator inside Activity Bar */}
                         <div 
                             onClick={() => setIsChatOpen(!isChatOpen)}
-                            className={`w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-colors border ${
+                            className={`w-9 h-9 rounded-xl flex items-center justify-center cursor-pointer transition-all duration-250 border ${
                                 isChatOpen 
-                                    ? "text-white bg-zinc-900 border-zinc-800" 
-                                    : "text-zinc-500 hover:text-zinc-350 hover:bg-zinc-900/40 border-transparent"
+                                    ? "text-white bg-obsidian-950 border-obsidian-800 shadow-inner" 
+                                    : "text-obsidian-500 hover:text-obsidian-200 hover:bg-obsidian-850 border-transparent"
                             }`}
                             title="Toggle Chat & AI"
                         >
                             <i className="ri-message-3-line text-base"></i>
                         </div>
+
                         {/* Invite modal trigger inside Activity Bar */}
                         <div 
                             onClick={handleOpenInviteModal}
-                            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-500 hover:text-zinc-350 hover:bg-zinc-900/40 border border-transparent cursor-pointer transition-colors"
+                            className="w-9 h-9 rounded-xl flex items-center justify-center text-obsidian-500 hover:text-obsidian-200 hover:bg-obsidian-850 border border-transparent cursor-pointer transition-all duration-250"
                             title="Add Collaborator"
                         >
                             <i className="ri-user-add-line text-base"></i>
@@ -498,7 +508,7 @@ const Project = () => {
                     <div className="flex flex-col items-center gap-4">
                         {/* User initials representation */}
                         <div 
-                            className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-[10px] font-bold text-zinc-400 font-mono uppercase cursor-default"
+                            className="w-8 h-8 rounded-full bg-obsidian-950 border border-obsidian-850 flex items-center justify-center text-[10px] font-bold text-obsidian-400 font-mono uppercase cursor-default shadow-inner"
                             title={user?.email}
                         >
                             {user?.email ? user.email.slice(0, 2) : "??"}
@@ -507,23 +517,23 @@ const Project = () => {
                 </aside>
 
                 {/* 2. Unified Sidebar - Files & Collaborators */}
-                <aside className="w-60 border-r border-zinc-800 bg-zinc-950 flex flex-col flex-shrink-0">
+                <aside className="w-60 border-r border-obsidian-850 bg-obsidian-900 flex flex-col flex-shrink-0 shadow-sm">
                     {/* Local File Search Input */}
-                    <div className="p-3 border-b border-zinc-900/60">
+                    <div className="p-3 border-b border-obsidian-850/60 bg-obsidian-900/50">
                         <div className="relative">
-                            <span className="absolute inset-y-0 left-0 pl-2.5 flex items-center text-zinc-550 pointer-events-none">
+                            <span className="absolute inset-y-0 left-0 pl-2.5 flex items-center text-obsidian-500 pointer-events-none">
                                 <i className="ri-search-line text-xs"></i>
                             </span>
                             <input
                                 value={fileSearchQuery}
                                 onChange={(e) => setFileSearchQuery(e.target.value)}
-                                className="w-full pl-8 pr-3 py-1.5 bg-zinc-900 border border-zinc-850 hover:border-zinc-800 focus:border-zinc-700 focus:ring-0 rounded text-[11px] text-white placeholder-zinc-500 focus:outline-none transition-all font-mono"
+                                className="w-full pl-8 pr-7 py-1.5 bg-obsidian-950 border border-obsidian-800 hover:border-obsidian-750 focus:border-accent-violet rounded-lg text-[11px] text-white placeholder-obsidian-500 focus:outline-none transition-all font-mono"
                                 placeholder="Search files..."
                             />
                             {fileSearchQuery && (
                                 <button 
                                     onClick={() => setFileSearchQuery("")}
-                                    className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-zinc-500 hover:text-zinc-350"
+                                    className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-obsidian-400 hover:text-white"
                                 >
                                     <i className="ri-close-line text-xs"></i>
                                 </button>
@@ -532,12 +542,12 @@ const Project = () => {
                     </div>
 
                     {/* Files Section */}
-                    <div className="flex-1 flex flex-col overflow-hidden min-h-[150px]">
-                        <div className="p-3 pb-1.5 flex justify-between items-center bg-zinc-950">
-                            <span className="text-[10px] font-bold text-zinc-500 tracking-wider uppercase font-mono">Files</span>
+                    <div className="flex-1 flex flex-col overflow-hidden min-h-[150px] bg-obsidian-900/10">
+                        <div className="p-3 pb-1.5 flex justify-between items-center">
+                            <span className="text-[10px] font-bold text-obsidian-400 tracking-widest uppercase font-mono">Files</span>
                             <button 
                                 onClick={handleCreateFile}
-                                className="w-5 h-5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-850 text-zinc-400 hover:text-zinc-200 rounded transition-colors flex items-center justify-center"
+                                className="w-5 h-5 bg-obsidian-950 hover:bg-obsidian-800 border border-obsidian-800 text-obsidian-300 hover:text-white rounded-lg transition-colors flex items-center justify-center shadow-sm"
                                 title="Create File"
                             >
                                 <i className="ri-file-add-line text-xs"></i>
@@ -548,8 +558,8 @@ const Project = () => {
                             {Object.keys(fileTree).filter(filename => 
                                 filename.toLowerCase().includes(fileSearchQuery.toLowerCase())
                             ).length === 0 ? (
-                                <div className="text-center text-[10px] text-zinc-600 py-6 font-mono">
-                                    {Object.keys(fileTree).length === 0 ? "No files." : "No matches found."}
+                                <div className="text-center text-[10px] text-obsidian-500 py-8 font-mono">
+                                    {Object.keys(fileTree).length === 0 ? "No files inside project." : "No files matched."}
                                 </div>
                             ) : (
                                 Object.keys(fileTree)
@@ -558,10 +568,10 @@ const Project = () => {
                                         <div
                                             key={filename}
                                             onClick={() => handleOpenFile(filename)}
-                                            className={`w-full group/file flex items-center justify-between px-2.5 py-1.5 text-[11px] font-mono rounded transition-all cursor-pointer border ${
+                                            className={`w-full group/file flex items-center justify-between px-2.5 py-2 text-[11px] font-mono rounded-lg transition-all cursor-pointer border ${
                                                 selectedFile === filename 
-                                                    ? "bg-zinc-900 text-white border-zinc-850" 
-                                                    : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/30 border-transparent"
+                                                    ? "bg-obsidian-950 text-white border-obsidian-800 shadow-sm" 
+                                                    : "text-obsidian-350 hover:text-white hover:bg-obsidian-850/50 border-transparent"
                                             }`}
                                         >
                                             <span className="truncate flex items-center gap-2">
@@ -570,7 +580,7 @@ const Project = () => {
                                             </span>
                                             <button
                                                 onClick={(e) => handleDeleteFile(e, filename)}
-                                                className="opacity-0 group-hover/file:opacity-100 p-0.5 text-zinc-500 hover:text-red-400 rounded transition-opacity"
+                                                className="opacity-0 group-hover/file:opacity-100 p-0.5 text-obsidian-500 hover:text-red-400 rounded transition-opacity"
                                                 title="Delete File"
                                             >
                                                 <i className="ri-delete-bin-line text-xs"></i>
@@ -582,17 +592,17 @@ const Project = () => {
                     </div>
 
                     {/* Collaborators Collapsible Section */}
-                    <div className="border-t border-zinc-900/80 bg-zinc-950 flex flex-col flex-shrink-0">
+                    <div className="border-t border-obsidian-850 bg-obsidian-900 flex flex-col flex-shrink-0 shadow-inner">
                         <div 
                             onClick={() => setIsCollabSectionCollapsed(!isCollabSectionCollapsed)}
-                            className="p-3 flex justify-between items-center cursor-pointer select-none hover:bg-zinc-900/10 transition-colors"
+                            className="p-3 flex justify-between items-center cursor-pointer select-none hover:bg-obsidian-850/30 transition-colors"
                         >
                             <div className="flex items-center gap-1.5">
-                                <i className={`text-zinc-500 text-xs transition-transform duration-200 ${isCollabSectionCollapsed ? "ri-arrow-right-s-line" : "ri-arrow-down-s-line"}`}></i>
-                                <span className="text-[10px] font-bold text-zinc-500 tracking-wider uppercase font-mono">
+                                <i className={`text-obsidian-500 text-xs transition-transform duration-200 ${isCollabSectionCollapsed ? "ri-arrow-right-s-line" : "ri-arrow-down-s-line"}`}></i>
+                                <span className="text-[10px] font-bold text-obsidian-450 tracking-widest uppercase font-mono">
                                     Collaborators
                                 </span>
-                                <span className="text-[9px] bg-zinc-900 border border-zinc-850 px-1.5 py-0.2 rounded text-zinc-500 font-mono">
+                                <span className="text-[9px] bg-obsidian-950 border border-obsidian-800 px-1.5 py-0.2 rounded-lg text-obsidian-400 font-mono shadow-inner">
                                     {collaborators.length}
                                 </span>
                             </div>
@@ -601,7 +611,7 @@ const Project = () => {
                                     e.stopPropagation();
                                     handleOpenInviteModal();
                                 }}
-                                className="w-5 h-5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-850 text-zinc-400 hover:text-zinc-200 rounded transition-colors flex items-center justify-center"
+                                className="w-5 h-5 bg-obsidian-950 hover:bg-obsidian-800 border border-obsidian-800 text-obsidian-300 hover:text-white rounded-lg transition-colors flex items-center justify-center shadow-sm"
                                 title="Add Collaborator"
                             >
                                 <i className="ri-user-add-line text-xs"></i>
@@ -609,14 +619,14 @@ const Project = () => {
                         </div>
                         
                         {!isCollabSectionCollapsed && (
-                            <div className="max-h-48 overflow-y-auto p-2 pt-0 space-y-1 scroll-container border-t border-zinc-900/30">
+                            <div className="max-h-48 overflow-y-auto p-2 pt-0 space-y-1 scroll-container border-t border-obsidian-850/30">
                                 {collaborators.map((c) => (
-                                    <div key={c._id} className="flex items-center gap-2 p-1.5 bg-zinc-900/10 rounded border border-transparent hover:border-zinc-900 hover:bg-zinc-900/30 transition-all duration-150">
-                                        <div className="w-5 h-5 rounded bg-zinc-900 border border-zinc-855 flex items-center justify-center font-bold text-[9px] text-zinc-400 uppercase font-mono shadow-sm">
+                                    <div key={c._id} className="flex items-center gap-2 p-1.5 bg-obsidian-900/20 rounded-lg border border-transparent hover:border-obsidian-800 hover:bg-obsidian-850/35 transition-all duration-150">
+                                        <div className="w-5 h-5 rounded-lg bg-obsidian-950 border border-obsidian-800 flex items-center justify-center font-bold text-[9px] text-obsidian-400 uppercase font-mono shadow-sm">
                                             {c.email.slice(0, 2)}
                                         </div>
-                                        <span className="text-[10.5px] text-zinc-450 font-mono truncate flex-1" title={c.email}>{c.email}</span>
-                                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full flex-shrink-0" title="Online"></span>
+                                        <span className="text-[10.5px] text-obsidian-350 font-mono truncate flex-1" title={c.email}>{c.email}</span>
+                                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full flex-shrink-0 animate-pulse" title="Online"></span>
                                     </div>
                                 ))}
                             </div>
@@ -688,65 +698,22 @@ const Project = () => {
 
                             {/* Active Editor Panel */}
                             {selectedFile ? (
-                                <div className="flex-1 flex flex-col overflow-hidden bg-black">
-                                    {/* Editor Textarea with Synced Line Gutter */}
-                                    <div className="flex-1 flex overflow-hidden relative">
-                                        <div 
-                                            ref={gutterRef}
-                                            className="w-10 bg-zinc-950/20 border-r border-zinc-900 text-zinc-700 font-mono text-[11px] text-right pr-2.5 select-none overflow-hidden scroll-container"
-                                            style={{
-                                                paddingTop: '12px',
-                                                paddingBottom: '12px',
-                                                lineHeight: '18px'
-                                            }}
-                                        >
-                                            {editorContent.split('\n').map((_, i) => (
-                                                <div key={i} className="h-[18px] leading-[18px]">{i + 1}</div>
-                                            ))}
-                                        </div>
-                                        <textarea
-                                            ref={textareaRef}
-                                            value={editorContent}
-                                            onChange={(e) => {
-                                                setEditorContent(e.target.value);
-                                                setIsUnsaved(true);
-                                            }}
-                                            onScroll={handleScroll}
-                                            onKeyDown={handleKeyDown}
-                                            className="flex-1 h-full bg-transparent font-mono text-[11px] text-zinc-300 focus:outline-none resize-none overflow-y-auto overflow-x-auto whitespace-pre p-3 scroll-container"
-                                            style={{
-                                                tabSize: 4,
-                                                outline: 'none',
-                                                lineHeight: '18px',
-                                                paddingTop: '12px',
-                                                paddingBottom: '12px'
-                                            }}
-                                            placeholder="Write your code here..."
-                                        />
-                                    </div>
-                                    {/* Editor Status Bar */}
-                                    <div className="h-6 border-t border-zinc-900 bg-zinc-950 px-4 flex justify-between items-center text-[10px] text-zinc-550 font-mono flex-shrink-0 select-none">
-                                        <div className="flex items-center gap-3">
-                                            <span>Words: {editorContent.trim() ? editorContent.trim().split(/\s+/).length : 0}</span>
-                                            <span>Chars: {editorContent.length}</span>
-                                            <span className="text-zinc-800">|</span>
-                                            <span>Lines: {editorContent.split('\n').length}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="capitalize">{selectedFile.split('.').pop() || "Plaintext"}</span>
-                                            <span className="text-zinc-800">|</span>
-                                            {isUnsaved ? (
-                                                <span className="text-yellow-500 flex items-center gap-1">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-500"></span> Unsaved Changes
-                                                </span>
-                                            ) : (
-                                                <span className="text-zinc-550 flex items-center gap-1">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-zinc-700"></span> Synced
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
+                                <Editor
+                                    height="100%"
+                                    language={getLanguageFromFilename(selectedFile)}
+                                    value={editorContent}
+                                    onChange={(value) => {
+                                        setEditorContent(value ?? "");
+                                        setIsUnsaved(true);
+                                    }}
+                                    theme="vs-dark"
+                                    options={{
+                                        automaticLayout: true,
+                                        scrollBeyondLastLine: false,
+                                        fontSize: 13,
+                                        minimap: { enabled: false }
+                                    }}
+                                />
                             ) : (
                                 <div className="flex-1 flex flex-col items-center justify-center text-center p-6 bg-black">
                                     <div className="w-12 h-12 rounded-lg bg-zinc-900/50 flex items-center justify-center mb-3 border border-zinc-800 shadow-sm">
