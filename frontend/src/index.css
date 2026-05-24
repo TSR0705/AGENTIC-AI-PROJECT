@@ -41,47 +41,42 @@ body {
   display: none; /* Keep chat scrollbar hidden but scrollable */
 }
 
-/* Glassmorphism custom classes */
+/* Glassmorphism custom classes - Redefined as minimal flat zinc panels */
 .glass-panel {
-  background: rgba(17, 24, 39, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  background-color: #09090b; /* zinc-950 */
+  border: 1px solid #27272a; /* zinc-800 */
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.35);
 }
 
 .glass-card {
-  background: rgba(17, 24, 39, 0.45);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: #09090b; /* zinc-950 */
+  border: 1px solid #18181b; /* zinc-900 */
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-card:hover {
-  background: rgba(17, 24, 39, 0.7);
-  border-color: rgba(99, 102, 241, 0.4);
-  box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.15);
-  transform: translateY(-2px);
+  border-color: #3f3f46; /* zinc-700 */
+  background-color: #121214; /* zinc-900/60 */
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
 }
 
 /* Custom scrolling classes */
 .scroll-container::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 .scroll-container::-webkit-scrollbar-track {
   background: transparent;
 }
 .scroll-container::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.1);
+  background: rgba(156, 163, 175, 0.08);
   border-radius: 9999px;
 }
 .scroll-container::-webkit-scrollbar-thumb:hover {
-  background: rgba(156, 163, 175, 0.25);
+  background: rgba(156, 163, 175, 0.18);
 }
 
 /* Code area selection glow */
 textarea::selection {
-  background: rgba(99, 102, 241, 0.35); /* indigo selection */
+  background: rgba(250, 204, 21, 0.2); /* yellow-400 selection tint */
 }
