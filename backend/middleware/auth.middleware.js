@@ -1,31 +1,29 @@
 import jwt from "jsonwebtoken";
 import redisClient from "../services/redis.service.js";
-
+import { env } from "../config/env.js";
 
 export const authUser = async (req, res, next) => {
     try {
-        const token = req.cookies.token || req.headers.authorization.split(' ')[ 1 ];
+        const authHeader = req.headers.authorization;
+        const token =
+            req.cookies.token || (authHeader && authHeader.startsWith("Bearer ") ? authHeader.split(" ")[1] : null);
 
         if (!token) {
-            return res.status(401).send({ error: 'Unauthorized User' });
+            return res.status(401).send({ error: "Unauthorized User" });
         }
 
         const isBlackListed = await redisClient.get(token);
 
         if (isBlackListed) {
-
-            res.cookie('token', '');
-
-            return res.status(401).send({ error: 'Unauthorized User' });
+            res.cookie("token", "");
+            return res.status(401).send({ error: "Unauthorized User" });
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, env.JWT_SECRET);
         req.user = decoded;
         next();
     } catch (error) {
-
-        console.log(error);
-
-        res.status(401).send({ error: 'Unauthorized User' });
+        console.error("Auth middleware error:", error.message);
+        res.status(401).send({ error: "Unauthorized User" });
     }
-}
+};
