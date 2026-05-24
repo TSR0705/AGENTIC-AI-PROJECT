@@ -1,7 +1,7 @@
-import userModel from '../models/user.model.js';
-import * as userService from '../services/user.service.js';
-import { validationResult } from 'express-validator';
-import redisClient from '../services/redis.service.js';
+import userModel from "../models/user.model.js";
+import * as userService from "../services/user.service.js";
+import { validationResult } from "express-validator";
+import redisClient from "../services/redis.service.js";
 
 export const createUserController = async (req, res) => {
     const errors = validationResult(req);
@@ -19,12 +19,11 @@ export const createUserController = async (req, res) => {
         delete userObj.password;
 
         res.status(201).json({ user: userObj, token });
-
     } catch (err) {
         console.log(err);
         res.status(400).send(err.message);
     }
-}
+};
 
 export const loginController = async (req, res) => {
     const errors = validationResult(req);
@@ -36,16 +35,16 @@ export const loginController = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        const user = await userModel.findOne({ email }).select('+password');
+        const user = await userModel.findOne({ email }).select("+password");
 
         if (!user) {
             return res.status(401).json({
                 errors: [
                     {
-                        msg: 'Invalid credentials'
-                    }
-                ]
-            })
+                        msg: "Invalid credentials",
+                    },
+                ],
+            });
         }
 
         const isMatch = await user.comparePassword(password);
@@ -54,10 +53,10 @@ export const loginController = async (req, res) => {
             return res.status(401).json({
                 errors: [
                     {
-                        msg: 'Invalid credentials'
-                    }
-                ]
-            })
+                        msg: "Invalid credentials",
+                    },
+                ],
+            });
         }
 
         const token = await user.generateJWT();
@@ -66,12 +65,11 @@ export const loginController = async (req, res) => {
         delete userObj.password;
 
         res.status(200).json({ user: userObj, token });
-
     } catch (err) {
         console.log(err);
         res.status(400).send(err.message);
     }
-}
+};
 
 export const profileController = async (req, res) => {
     try {
@@ -81,40 +79,34 @@ export const profileController = async (req, res) => {
         console.log(err);
         res.status(400).send(err.message);
     }
-}
+};
 
 export const logoutController = async (req, res) => {
     try {
-        const token = req.cookies.token || req.headers.authorization?.split(' ')[ 1 ];
+        const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
 
         if (token) {
-            await redisClient.set(token, 'logout', 'EX', 86400);
+            await redisClient.set(token, "logout", "EX", 86400);
         }
 
         res.status(200).json({
-            message: 'Logged out successfully'
+            message: "Logged out successfully",
         });
-
     } catch (err) {
         console.log(err);
         res.status(400).send(err.message);
     }
-}
+};
 
 export const getAllUsersController = async (req, res) => {
     try {
-        const loggedInUser = await userModel.findOne({
-            email: req.user.email
-        })
-
-        const allUsers = await userService.getAllUsers({ userId: loggedInUser._id });
+        const allUsers = await userService.getAllUsers({ userId: req.user._id });
 
         res.status(200).json({
-            users: allUsers
-        })
-
+            users: allUsers,
+        });
     } catch (err) {
-        console.log(err);
+        console.error("Get all users error:", err.message);
         res.status(400).send(err.message);
     }
-}
+};
