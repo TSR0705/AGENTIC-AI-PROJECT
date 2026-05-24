@@ -1,7 +1,8 @@
-import { GoogleGenerativeAI } from "@google/generative-ai"
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { env } from "../config/env.js";
 
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_KEY);
+const genAI = new GoogleGenerativeAI(env.GOOGLE_AI_KEY);
 const model = genAI.getGenerativeModel({
     model: "gemini-2.5-flash",
     generationConfig: {
