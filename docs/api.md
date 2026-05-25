@@ -110,13 +110,13 @@ Base path: `/projects`
 - **Request Body**:
     ```json
     {
-        "name": "whisper-dashboard"
+        "name": "codeweave-dashboard"
     }
     ```
 - **Response (201 Created)**:
     ```json
     {
-        "name": "whisper-dashboard",
+        "name": "codeweave-dashboard",
         "users": ["603d2f9b8849b231ccf1b0a1"],
         "_id": "603d2faf8849b231ccf1b0a3",
         "fileTree": {},
@@ -134,7 +134,7 @@ Base path: `/projects`
         "projects": [
             {
                 "_id": "603d2faf8849b231ccf1b0a3",
-                "name": "whisper-dashboard",
+                "name": "codeweave-dashboard",
                 "users": ["603d2f9b8849b231ccf1b0a1"]
             }
         ]
@@ -160,7 +160,7 @@ Base path: `/projects`
     {
         "project": {
             "_id": "603d2faf8849b231ccf1b0a3",
-            "name": "whisper-dashboard",
+            "name": "codeweave-dashboard",
             "users": ["603d2f9b8849b231ccf1b0a1", "603d2f9b8849b231ccf1b0a2"]
         }
     }
@@ -175,7 +175,7 @@ Base path: `/projects`
     {
         "project": {
             "_id": "603d2faf8849b231ccf1b0a3",
-            "name": "whisper-dashboard",
+            "name": "codeweave-dashboard",
             "users": [{ "_id": "603d2f9b8849b231ccf1b0a1", "email": "developer@domain.com" }],
             "fileTree": {
                 "index.js": {

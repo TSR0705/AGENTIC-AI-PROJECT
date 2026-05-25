@@ -112,7 +112,7 @@ io.on("connection", (socket) => {
                 console.error("AI Generation Error:", error.message);
                 io.to(socket.roomId).emit("project-message", {
                     message: JSON.stringify({
-                        text: `⚠️ WhisperAgent Error: Failed to generate response (${error.message}). Please verify your GOOGLE_AI_KEY in backend/.env.`,
+                        text: `⚠️ CodeWeave AI Error: Failed to generate response (${error.message}). Please verify your GOOGLE_AI_KEY in backend/.env.`,
                     }),
                     sender: {
                         _id: "ai",

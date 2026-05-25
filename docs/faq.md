@@ -1,6 +1,6 @@
 # Frequently Asked Questions (FAQ)
 
-Here are answers to the most common questions regarding the design, operation, and maintenance of the Whisper Sandbox.
+Here are answers to the most common questions regarding the design, operation, and maintenance of CodeWeave.
 
 ---
 

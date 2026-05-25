@@ -1,6 +1,6 @@
 # Deployment Guide
 
-This document outlines how to deploy the Whisper Sandbox to staging and production environments, including Docker operations, manual VM service configurations, and standard cloud procedures.
+This document outlines how to deploy CodeWeave to staging and production environments, including Docker operations, manual VM service configurations, and standard cloud procedures.
 
 ---
 
@@ -21,7 +21,7 @@ docker-compose up --build
 To build a production image of the backend API for deployment to container registries (AWS ECR, GCP GCR, Koyeb):
 
 ```bash
-docker build -t whisper-backend:latest ./backend
+docker build -t codeweave-backend:latest ./backend
 ```
 
 To run the built backend container standalone:
@@ -31,7 +31,7 @@ docker run -d -p 3000:3000 \
   -e MONGODB_URI="mongodb+srv://..." \
   -e JWT_SECRET="production_jwt_secret" \
   -e GOOGLE_AI_KEY="gemini_key" \
-  whisper-backend:latest
+  codeweave-backend:latest
 ```
 
 ---
@@ -60,7 +60,7 @@ PM2 manages your Node server process, keeping it alive, restarting it on failure
     {
         "apps": [
             {
-                "name": "whisper-backend",
+                "name": "codeweave-backend",
                 "script": "server.js",
                 "instances": "max",
                 "exec_mode": "cluster",
@@ -90,7 +90,7 @@ Configure Nginx as a reverse proxy to route traffic from port 80/443 to our Expr
     ```bash
     sudo apt install nginx -y
     ```
-- **Configure Nginx virtual host** (`/etc/nginx/sites-available/whisper`):
+- **Configure Nginx virtual host** (`/etc/nginx/sites-available/codeweave`):
 
     ```nginx
     server {
@@ -110,7 +110,7 @@ Configure Nginx as a reverse proxy to route traffic from port 80/443 to our Expr
 
 - **Enable the site and reload Nginx**:
     ```bash
-    sudo ln -s /etc/nginx/sites-available/whisper /etc/nginx/sites-enabled/
+    sudo ln -s /etc/nginx/sites-available/codeweave /etc/nginx/sites-enabled/
     sudo nginx -t
     sudo systemctl reload nginx
     ```

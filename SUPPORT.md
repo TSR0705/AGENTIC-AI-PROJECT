@@ -1,6 +1,6 @@
 # Support Guide
 
-If you need help or have questions regarding the Whisper Sandbox, use the following resources:
+If you need help or have questions regarding CodeWeave, use the following resources:
 
 ---
 

@@ -1,6 +1,6 @@
 # Observability Guide
 
-This document details the telemetry, logging standards, health check probes, and request tracking mechanisms implemented to ensure production reliability in the Whisper Sandbox.
+This document details the telemetry, logging standards, health check probes, and request tracking mechanisms implemented to ensure production reliability in CodeWeave.
 
 ---
 

@@ -383,7 +383,7 @@ const Project = () => {
                 >
                     <span className="text-[10px] font-bold text-zinc-400 mb-1 flex items-center gap-1 font-mono">
                         <span className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-pulse"></span>
-                        <i className="ri-robot-2-line"></i> whisper-assistant
+                        <i className="ri-robot-2-line"></i> codeweave-ai
                     </span>
                     <div className="text-[11px] text-zinc-300 leading-relaxed font-mono">
                         {parseMessageText(aiText)}
@@ -789,9 +789,7 @@ const Project = () => {
                             <div className="w-14 h-14 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center mb-4 shadow-xl">
                                 <i className="ri-code-s-slash-line text-2xl text-zinc-400"></i>
                             </div>
-                            <h3 className="text-sm font-bold text-zinc-200 tracking-tight font-mono">
-                                whisper-sandbox
-                            </h3>
+                            <h3 className="text-sm font-bold text-zinc-200 tracking-tight font-mono">codeweave</h3>
                             <p className="text-[11px] text-zinc-500 max-w-sm mt-1.5 font-mono leading-relaxed">
                                 Select or create a file from the explorer pane to start coding collaboratively.
                             </p>

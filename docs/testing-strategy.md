@@ -1,6 +1,6 @@
 # Testing Strategy
 
-This document details the testing architecture, validation targets, local verification commands, and CI execution flow for the Whisper Sandbox.
+This document details the testing architecture, validation targets, local verification commands, and CI execution flow for CodeWeave.
 
 ---
 

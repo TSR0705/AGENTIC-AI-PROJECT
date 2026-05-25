@@ -1,6 +1,6 @@
 # Security Policy & Implementation
 
-This document details the security model, configuration policies, validation schemes, and hardening standards implemented in the Whisper Sandbox.
+This document details the security model, configuration policies, validation schemes, and hardening standards implemented in CodeWeave.
 
 ---
 

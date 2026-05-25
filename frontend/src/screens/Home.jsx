@@ -65,7 +65,7 @@ const Home = () => {
                 <header className="flex justify-between items-center mb-8 pb-6 border-b border-obsidian-850">
                     <div>
                         <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2 font-mono">
-                            <i className="ri-terminal-box-line text-accent-violet"></i> whisper-sandbox
+                            <i className="ri-terminal-box-line text-accent-violet"></i> codeweave
                         </h1>
                         <p className="text-obsidian-400 text-xs mt-1.5 flex items-center gap-1.5 font-mono">
                             <span className="inline-block w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>

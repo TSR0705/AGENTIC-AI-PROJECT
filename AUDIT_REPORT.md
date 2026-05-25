@@ -6,7 +6,7 @@ This report presents a thorough, professional evaluation of the collaborative sa
 
 ## Executive Summary
 
-The project is a collaborative development environment (Whisper Sandbox) featuring real-time socket updates, file tree synchronization, and an LLM-assisted workspace. While the frontend user interface has been refactored for professional usability, the backend architecture and devops pipeline remain in a "developer project" state.
+The project is a collaborative development environment (CodeWeave) featuring real-time socket updates, file tree synchronization, and an LLM-assisted workspace. While the frontend user interface has been refactored for professional usability, the backend architecture and devops pipeline remain in a "developer project" state.
 
 We identified several **critical security vulnerabilities** (unprotected routes, CORS wildcards) and **reliability issues** (uncaught process crashes) that act as strict production blockers. Remediation across all 12 defined phases is required before this repository can meet open-source and production-grade standards.
 

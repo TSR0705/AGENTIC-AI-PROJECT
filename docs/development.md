@@ -1,6 +1,6 @@
 # Developer Guide
 
-This document describes how to set up, run, format, and contribute to the Whisper Sandbox codebase.
+This document describes how to set up, run, format, and contribute to the CodeWeave codebase.
 
 ---
 
@@ -46,7 +46,7 @@ Create `backend/.env` and define:
 
 ```env
 PORT=3000
-MONGODB_URI=mongodb://127.0.0.1:27017/whisper-sandbox
+MONGODB_URI=mongodb://127.0.0.1:27017/codeweave-sandbox
 JWT_SECRET=super_secure_jwt_passphrase
 GOOGLE_AI_KEY=your_gemini_api_key
 REDIS_HOST=127.0.0.1

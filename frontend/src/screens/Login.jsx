@@ -46,7 +46,7 @@ const Login = () => {
                     <div className="w-12 h-12 bg-obsidian-900 border border-obsidian-800 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-inner">
                         <i className="ri-terminal-box-line text-xl text-zinc-300"></i>
                     </div>
-                    <h2 className="text-xl font-bold tracking-tight text-white mb-1.5 font-mono">whisper-sandbox</h2>
+                    <h2 className="text-xl font-bold tracking-tight text-white mb-1.5 font-mono">codeweave</h2>
                     <p className="text-xs text-obsidian-400 font-mono">Collaborative coding workspace</p>
                 </header>
 

@@ -1,4 +1,4 @@
-# Contributing to Whisper Sandbox
+# Contributing to CodeWeave
 
 We welcome contributions from the community! Follow these instructions to set up your environment, write clean code, and submit Pull Requests.
 

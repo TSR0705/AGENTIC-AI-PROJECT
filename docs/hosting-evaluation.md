@@ -1,6 +1,6 @@
 # Hosting Evaluation Guide
 
-This document presents a comprehensive evaluation of hosting alternatives for the Whisper Sandbox stack, analyzing free tiers, websocket requirements, cold starts, and container management.
+This document presents a comprehensive evaluation of hosting alternatives for the CodeWeave stack, analyzing free tiers, websocket requirements, cold starts, and container management.
 
 ---
 

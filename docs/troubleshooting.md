@@ -28,7 +28,7 @@ The Redis server daemon is not running on the configured host/port, or has authe
 
 ### Symptom:
 
-Assistant replies: `⚠️ WhisperAgent Error: Failed to generate response (API_KEY_INVALID). Please verify your GOOGLE_AI_KEY in backend/.env.`
+Assistant replies: `⚠️ CodeWeave AI Error: Failed to generate response (API_KEY_INVALID). Please verify your GOOGLE_AI_KEY in backend/.env.`
 
 ### Reason:
 
@@ -43,7 +43,7 @@ The Google Generative AI key is missing, unauthorized, or expired.
     ```
 3. Restart the backend process:
     ```bash
-    pm2 restart whisper-backend # or stop and start node process
+    pm2 restart codeweave-backend # or stop and start node process
     ```
 
 ---

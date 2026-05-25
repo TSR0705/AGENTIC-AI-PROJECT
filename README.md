@@ -1,6 +1,6 @@
-# Whisper Sandbox
+# CodeWeave
 
-Whisper Sandbox is a production-grade, collaborative web-based sandbox workspace. It features real-time text synchronization, file tree organization, and interactive AI coding assistance powered by Gemini.
+CodeWeave is a production-grade, collaborative web-based sandbox workspace. It features real-time text synchronization, file tree organization, and interactive AI coding assistance powered by Gemini.
 
 ---
 
@@ -54,7 +54,7 @@ npm install --prefix backend
 
 ```env
 PORT=3000
-MONGODB_URI=mongodb://127.0.0.1:27017/whisper-sandbox
+MONGODB_URI=mongodb://127.0.0.1:27017/codeweave-sandbox
 JWT_SECRET=your_jwt_secret_phrase
 GOOGLE_AI_KEY=your_gemini_api_key
 REDIS_HOST=127.0.0.1
