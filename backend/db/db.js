@@ -2,9 +2,10 @@ import mongoose from "mongoose";
 import dns from "dns";
 import { env } from "../config/env.js";
 
-// Set fallback public DNS servers if using SRV connection string
-// to resolve local router DNS limitations for SRV records
-if (env.MONGODB_URI && env.MONGODB_URI.startsWith("mongodb+srv://")) {
+// Set fallback public DNS servers only in local development/testing if using SRV connection string
+// to resolve local router DNS limitations. Avoid doing this in production (e.g. Render, Heroku)
+// as cloud environments manage their own DNS resolution path.
+if (process.env.NODE_ENV !== "production" && env.MONGODB_URI && env.MONGODB_URI.startsWith("mongodb+srv://")) {
     try {
         dns.setServers(["8.8.8.8", "1.1.1.1"]);
     } catch (err) {
