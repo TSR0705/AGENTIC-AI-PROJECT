@@ -1,26 +1,37 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import request from "supertest";
 import mongoose from "mongoose";
-import { MongoMemoryServer } from "mongodb-memory-server";
 import User from "../models/user.model.js";
 import Project from "../models/project.model.js";
 
-let mongoServer;
 let app;
 
 beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const uri = mongoServer.getUri();
-    process.env.MONGODB_URI = uri;
-    process.env.JWT_SECRET = "test_super_secret_project";
+    // Set env vars before importing app (for env.js Proxy to pick them up)
+    process.env.JWT_SECRET = process.env.JWT_SECRET || "test_super_secret_project";
 
+    // Import app after env is configured — connect() is called inside app.js
     const appModule = await import("../app.js");
     app = appModule.default;
-});
+
+    // Wait for mongoose to actually connect
+    if (mongoose.connection.readyState !== 1) {
+        await new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => reject(new Error("MongoDB connection timeout")), 15000);
+            mongoose.connection.once("open", () => {
+                clearTimeout(timeout);
+                resolve();
+            });
+            mongoose.connection.once("error", (err) => {
+                clearTimeout(timeout);
+                reject(err);
+            });
+        });
+    }
+}, 30000);
 
 afterAll(async () => {
     await mongoose.disconnect();
-    await mongoServer.stop();
 });
 
 beforeEach(async () => {

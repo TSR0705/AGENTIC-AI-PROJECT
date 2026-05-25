@@ -2,9 +2,14 @@ name: Security Auditing
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - "fix/*"
+      - "feat/*"
+      - "chore/*"
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
   schedule:
     - cron: '0 0 * * 1' # Runs every Monday at midnight
 
@@ -26,10 +31,14 @@ jobs:
             frontend/package-lock.json
             backend/package-lock.json
 
-      - name: Run Dependency Vulnerability Check
+      - name: Audit Frontend Dependencies (high+)
         run: |
           echo "Auditing frontend dependencies..."
           npm audit --audit-level=high --prefix frontend
+        continue-on-error: false
+
+      - name: Audit Backend Dependencies (high+)
+        run: |
           echo "Auditing backend dependencies..."
           npm audit --audit-level=high --prefix backend
 

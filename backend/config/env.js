@@ -32,4 +32,15 @@ if (!parsed.success) {
     process.exit(1);
 }
 
-export const env = parsed.data;
+const envData = parsed.data;
+export const env = new Proxy(envData, {
+    get(target, prop) {
+        if (process.env[prop] !== undefined) {
+            if (typeof target[prop] === "number") {
+                return Number(process.env[prop]);
+            }
+            return process.env[prop];
+        }
+        return target[prop];
+    },
+});
